@@ -308,7 +308,7 @@ tbody tr:hover{background:#FAFBFD}
 .boletim-resumo span{font-size:11px;color:var(--texto-suave);text-transform:uppercase;letter-spacing:.6px}
 
 /* ---------- Toast ---------- */
-.toasts{position:fixed;bottom:24px;right:24px;z-index:120;display:flex;flex-direction:column;gap:10px}
+.toasts{position:fixed;bottom:42px;right:24px;z-index:120;display:flex;flex-direction:column;gap:10px}
 .toast{
   background:var(--azul-escuro);color:#fff;padding:13px 20px;border-radius:var(--raio-sm);
   box-shadow:var(--sombra-lg);font-size:13px;font-weight:500;display:flex;align-items:center;gap:10px;
@@ -475,6 +475,44 @@ tbody tr:hover{background:#FAFBFD}
 }
 .backup-aviso svg{width:17px;height:17px;stroke-width:2;color:var(--amarelo);flex-shrink:0;margin-top:2px}
 
+/* ---------- Hub (página inicial) ---------- */
+.hub{max-width:1060px;margin:0 auto}
+.hub-topo{display:flex;align-items:center;gap:18px;margin-bottom:28px}
+.hub-topo .logo-mark{width:58px;height:58px;border-radius:16px;box-shadow:var(--sombra)}
+.hub-topo span{font-size:10.5px;text-transform:uppercase;letter-spacing:1.5px;color:var(--azul-principal);font-weight:500}
+.hub-topo h2{font-size:24px;font-weight:600;letter-spacing:-.7px;color:var(--azul-escuro)}
+.hub-topo p{font-size:13px;color:var(--texto-suave)}
+.hub-grade{display:grid;grid-template-columns:repeat(auto-fit,minmax(248px,1fr));gap:18px}
+.hub-card{
+  display:flex;flex-direction:column;gap:12px;text-align:left;
+  background:var(--branco);border:1px solid rgba(229,233,240,.9);border-radius:var(--raio-lg);
+  padding:24px;box-shadow:var(--sombra);transition:var(--transicao);position:relative;overflow:hidden;
+}
+.hub-card::after{content:'';position:absolute;inset:0 0 auto 0;height:3px;background:var(--cor);opacity:0;transition:var(--transicao)}
+.hub-card:hover{transform:translateY(-4px);box-shadow:var(--sombra-md);border-color:var(--azul-claro)}
+.hub-card:hover::after{opacity:1}
+.hub-icone{width:46px;height:46px;border-radius:13px;display:grid;place-items:center;background:var(--bg);color:var(--cor)}
+.hub-icone svg{width:22px;height:22px;stroke-width:1.8}
+.hub-card b{font-size:15px;font-weight:600;color:var(--azul-escuro);letter-spacing:-.2px}
+.hub-card p{font-size:12.5px;color:var(--texto-suave);line-height:1.6;flex:1;margin:0}
+.hub-card u{
+  text-decoration:none;font-size:11.5px;font-weight:500;color:var(--azul-principal);
+  display:flex;align-items:center;gap:6px;
+}
+.hub-card u svg{width:14px;height:14px;stroke-width:2.2;transition:var(--transicao)}
+.hub-card:hover u svg{transform:translateX(3px)}
+
+/* Marca da sidebar clicável */
+.brand{cursor:pointer;border-radius:var(--raio-sm);transition:var(--transicao);width:100%;text-align:left}
+.brand:hover{opacity:.82}
+
+/* ---------- Marca d'água ---------- */
+.marca-dagua{
+  position:fixed;bottom:12px;right:22px;z-index:30;pointer-events:none;
+  font-size:11px;letter-spacing:.3px;color:#B2BAC6;white-space:nowrap;
+}
+.marca-dagua b{font-weight:500;color:#9BA5B3}
+
 /* ---------- Responsivo ---------- */
 @media (max-width:1180px){
   #gradeSwot{grid-template-columns:1fr!important}
@@ -516,7 +554,7 @@ tbody tr:hover{background:#FAFBFD}
 
 /* ---------- Impressão ---------- */
 @media print{
-  .sidebar,.topbar,.overlay,.toasts,.card-cabecalho .direita{display:none!important}
+  .sidebar,.topbar,.overlay,.toasts,.marca-dagua,.card-cabecalho .direita{display:none!important}
   .conteudo{margin:0}
   .pagina{padding:0}
   .card{box-shadow:none;border:none}
@@ -529,12 +567,12 @@ tbody tr:hover{background:#FAFBFD}
 
   <!-- ====================== MENU LATERAL ====================== -->
   <aside class="sidebar" id="sidebar">
-    <div class="brand">
+    <button class="brand" id="btnHub" title="Ir para a página inicial">
       <div class="logo-mark" role="img" aria-label="Logotipo"></div>
       <div class="brand-text">
         <b>Planejamento Comercial</b>
       </div>
-    </div>
+    </button>
 
     <p class="nav-label">Navegação</p>
     <nav class="nav">
@@ -598,8 +636,55 @@ tbody tr:hover{background:#FAFBFD}
       </div>
     </header>
 
+    <!-- ---------- HUB (PÁGINA INICIAL) ---------- -->
+    <section class="pagina" id="pagina-hub">
+      <div class="hub">
+        <div class="hub-topo">
+          <div class="logo-mark" role="img" aria-label="Logotipo"></div>
+          <h2>Planejamento Comercial</h2>
+        </div>
+
+        <div class="hub-grade">
+          <button class="hub-card" data-hub="dashboard" style="--cor:var(--azul-principal);--bg:rgba(10,100,255,.1)">
+            <div class="hub-icone"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg></div>
+            <b>Dashboard</b>
+            <p>Indicadores consolidados, prazos e gráficos por status, companhia e responsável.</p>
+            <u id="hubQtdDashboard">Abrir <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></u>
+          </button>
+
+          <button class="hub-card" data-hub="plano" style="--cor:var(--azul-medio);--bg:rgba(32,33,212,.1)">
+            <div class="hub-icone"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1.5"/><path d="M9 12h6M9 16h4"/></svg></div>
+            <b>Plano 5W2H</b>
+            <p>Cadastro e acompanhamento das ações, com filtros por carteira e exportações.</p>
+            <u id="hubQtdPlano">Abrir <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></u>
+          </button>
+
+          <button class="hub-card" data-hub="swot" style="--cor:var(--verde);--bg:rgba(15,169,104,.12)">
+            <div class="hub-icone"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="3.5" width="17" height="17" rx="2.5"/><path d="M12 3.5v17M3.5 12h17"/></svg></div>
+            <b>Análise SWOT</b>
+            <p>Matriz estratégica por companhia, com histórico filtrável por responsável.</p>
+            <u id="hubQtdSwot">Abrir <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></u>
+          </button>
+
+          <button class="hub-card" data-hub="boletim" style="--cor:var(--roxo);--bg:rgba(124,92,252,.12)">
+            <div class="hub-icone"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4h11l3 3v13a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1z"/><path d="M8 10h8M8 14h8M8 18h5"/></svg></div>
+            <b>Boletim</b>
+            <p>Relatório executivo automático, gerencial ou individual por responsável.</p>
+            <u>Abrir <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></u>
+          </button>
+
+          <button class="hub-card" data-hub="configuracoes" style="--cor:var(--amarelo);--bg:rgba(245,165,36,.13)">
+            <div class="hub-icone"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-2.9 1.2V21a2 2 0 1 1-4 0v-.1A1.7 1.7 0 0 0 7 19.4a1.7 1.7 0 0 0-1.9.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1A1.7 1.7 0 0 0 3 14.1H3a2 2 0 1 1 0-4h.1A1.7 1.7 0 0 0 4.6 7a1.7 1.7 0 0 0-.3-1.9l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1A1.7 1.7 0 0 0 9 2.6h.1A2 2 0 0 1 13 3v.1a1.7 1.7 0 0 0 2.9 1.2l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0 1.2 2.9H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></div>
+            <b>Configurações</b>
+            <p>Comerciais e carteiras, companhias de seguro e backup dos dados em JSON.</p>
+            <u id="hubQtdConfig">Abrir <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></u>
+          </button>
+        </div>
+      </div>
+    </section>
+
     <!-- ---------- DASHBOARD ---------- -->
-    <section class="pagina ativa" id="pagina-dashboard">
+    <section class="pagina" id="pagina-dashboard">
       <div class="hero">
         <div class="logo-mark" role="img" aria-label="Logotipo"></div>
         <div class="hero-texto">
@@ -1179,6 +1264,9 @@ tbody tr:hover{background:#FAFBFD}
   </div>
 </div>
 
+<!-- Marca d'água — troque o nome abaixo se necessário -->
+<div class="marca-dagua">Criado por: <b>Gabriel Aguiar</b></div>
+
 <div class="toasts" id="toasts"></div>
 
 <!-- ==========================================================================
@@ -1206,6 +1294,7 @@ const CORES = {
 };
 
 const PAGINAS = {
+  hub:           {titulo:'Início',               subtitulo:'Acesso rápido aos módulos'},
   dashboard:     {titulo:'Dashboard',            subtitulo:'Visão consolidada dos planos de ação'},
   plano:         {titulo:'Plano 5W2H',           subtitulo:'Cadastro e acompanhamento das ações'},
   swot:          {titulo:'Análise SWOT',         subtitulo:'Diagnóstico estratégico por companhia'},
@@ -1500,6 +1589,7 @@ function irPara(pagina){
   fecharMenuSuperior();
   window.scrollTo({top:0,behavior:'smooth'});
   if(pagina === 'dashboard') renderizarDashboard();
+  if(pagina === 'hub') renderizarHub();
 }
 
 /** Alterna os módulos da tela de Configurações. */
@@ -3302,6 +3392,12 @@ function registrarEventos(){
   // Navegação
   $$('.nav-item').forEach(b => b.addEventListener('click', () => irPara(b.dataset.pagina)));
   $('#btnMenu').addEventListener('click', alternarSidebar);
+  $('#btnHub').addEventListener('click', () => irPara('hub'));
+  $$('.hub-card').forEach(c => c.addEventListener('click', () => {
+    const destino = c.dataset.hub;
+    irPara(destino);
+    if(destino === 'configuracoes') irParaModulo('comerciais');
+  }));
   $('#overlay').addEventListener('click', fecharSidebar);
 
   // Menu superior (três pontos)
@@ -3426,6 +3522,20 @@ function registrarEventos(){
 /* =========================================================
    12. INICIALIZAÇÃO
    ========================================================= */
+/** Saudação e contadores dos cartões do hub. */
+function renderizarHub(){
+  const m = calcularMetricas();
+  const seta = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>';
+  const rotulo = (id, texto) => { const el = $(id); if(el) el.innerHTML = `${texto} ${seta}`; };
+
+  rotulo('#hubQtdDashboard', m.total ? `Taxa de conclusão de ${m.taxaConclusao}%` : 'Abrir');
+  rotulo('#hubQtdPlano',     acoes.length ? plural(acoes.length,'ação','ações') : 'Cadastrar ações');
+  rotulo('#hubQtdSwot',      swots.length ? plural(swots.length,'análise','análises') : 'Criar análise');
+  rotulo('#hubQtdConfig',    companhias.length
+    ? `${plural(companhias.length,'companhia','companhias')} · ${plural(comerciais.length,'comercial','comerciais')}`
+    : 'Configurar cadastros');
+}
+
 /** Preenche a data da faixa de boas-vindas do dashboard. */
 function atualizarHero(){
   const agora = new Date();
@@ -3451,7 +3561,7 @@ function iniciar(){
   limparFormularioSwot();
   renderizarSwots();
   renderizarDashboard();
-  irPara('dashboard');
+  irPara('hub');
 }
 
 document.addEventListener('DOMContentLoaded', iniciar);
