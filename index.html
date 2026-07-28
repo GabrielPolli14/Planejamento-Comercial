@@ -1,0 +1,3461 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Planejamento Comercial</title>
+
+<!-- Favicon (aba do navegador, favoritos e atalho salvo) -->
+<link rel="icon" type="image/png" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADkAAAA5CAIAAAADehTSAAACaUlEQVR4AeyWbStsURTH77i63JvbzeTedI2HQinylOcamagZ8vTOw5B3+CzyEXwLr/DGOShMZEIh1EyIlCQJb8bKyrbn2Kax1941U3ta7dZZ5+zZv/nP/+y9MnJ/16dLZHxLn49h1fNfGV2NrsYDxgPGA8YDxgPGA1o8MDLau7M3j9Hha1alshZWywoVFf3H8He3pzTrxfnV3u4RIk5ND2NCH7XoCli2tQkjRl19JSbEURertfzO6g94iZQ4XRerbYdisRiu4e9Obdanx2f7TdqamorSsmLkpoy6dAUmi7NsUjaAOQlDI6tthdjSqc66vbV/fX2DuN72hr//3JhLjxp1BaaVOGmph4Iy1vGJQYBzhFrLKmMNjvU7QOHSXo6zbFb2DyhKhxrWzq422JV6+3wOjkjk/PDgFIuZmd/9AZIN1LAGXhuUUZG0Cm2ggBUEQ9bGpurWtjpUkY0OG7C6RKKAFUCzf2bh2sHxAUzYaHMngtv9h9LOKmDlO9TycudZen//sLa6xdD5h1kxyYTKmpPziz+TlhbXPi68YsftBh8fSLJCZYVX2+VyscWWFlZZzhK+PywpKZBuZ6msgZ73fu/0JBoOHzBElmysh29v79gl/z+wYjIJiTUvL7fD18KWERoA78YdtrLtLInV8aIIDYCs/C4r3c6SWGG3QhQYPzMA3IKwuMMWLuVsIM/q8eR7CvPPzi4xEhgA4E6OI9HoBYvJ6SEofjXkWQHR5w2ymJ2ZS7x2bVUfH4kfFt6VZxV+ndaiYdUjr9E1/XWl/gLjAaqC4vlGV7Eu1KrRlaqgeL7RVawLtZpOur4AAAD//z8nWPYAAAAGSURBVAMAxtPAQ06klrkAAAAASUVORK5CYII=">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jspdf-autotable@3.8.2/dist/jspdf.plugin.autotable.min.js"></script>
+
+<!-- ==========================================================================
+     ESTILOS
+     ========================================================================== -->
+<style>
+:root{
+  --azul-principal:#0A64FF;
+  --azul-escuro:#050A34;
+  --azul-medio:#2021D4;
+  --azul-claro:#73C6FF;
+  --cinza-claro:#F4F6F9;
+
+  --branco:#FFFFFF;
+  --texto:#1B2033;
+  --texto-suave:#6B7280;
+  --borda:#E5E9F0;
+
+  --verde:#0FA968;
+  --amarelo:#F5A524;
+  --vermelho:#E5484D;
+  --roxo:#7C5CFC;
+
+  --raio-sm:10px;
+  --raio:14px;
+  --raio-lg:20px;
+
+  --sombra-sm:0 1px 2px rgba(5,10,52,.06), 0 1px 3px rgba(5,10,52,.04);
+  --sombra:0 4px 16px rgba(5,10,52,.07);
+  --sombra-md:0 10px 30px rgba(5,10,52,.10);
+  --sombra-lg:0 24px 60px rgba(5,10,52,.22);
+
+  --sidebar:260px;
+  --transicao:.22s cubic-bezier(.4,0,.2,1);
+
+  /* Logo institucional (embutida para funcionar sem arquivos externos) */
+  --logo:url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADkAAAA5CAIAAAADehTSAAACaUlEQVR4AeyWbStsURTH77i63JvbzeTedI2HQinylOcamagZ8vTOw5B3+CzyEXwLr/DGOShMZEIh1EyIlCQJb8bKyrbn2Kax1941U3ta7dZZ5+zZv/nP/+y9MnJ/16dLZHxLn49h1fNfGV2NrsYDxgPGA8YDxgPGA1o8MDLau7M3j9Hha1alshZWywoVFf3H8He3pzTrxfnV3u4RIk5ND2NCH7XoCli2tQkjRl19JSbEURertfzO6g94iZQ4XRerbYdisRiu4e9Obdanx2f7TdqamorSsmLkpoy6dAUmi7NsUjaAOQlDI6tthdjSqc66vbV/fX2DuN72hr//3JhLjxp1BaaVOGmph4Iy1vGJQYBzhFrLKmMNjvU7QOHSXo6zbFb2DyhKhxrWzq422JV6+3wOjkjk/PDgFIuZmd/9AZIN1LAGXhuUUZG0Cm2ggBUEQ9bGpurWtjpUkY0OG7C6RKKAFUCzf2bh2sHxAUzYaHMngtv9h9LOKmDlO9TycudZen//sLa6xdD5h1kxyYTKmpPziz+TlhbXPi68YsftBh8fSLJCZYVX2+VyscWWFlZZzhK+PywpKZBuZ6msgZ73fu/0JBoOHzBElmysh29v79gl/z+wYjIJiTUvL7fD18KWERoA78YdtrLtLInV8aIIDYCs/C4r3c6SWGG3QhQYPzMA3IKwuMMWLuVsIM/q8eR7CvPPzi4xEhgA4E6OI9HoBYvJ6SEofjXkWQHR5w2ymJ2ZS7x2bVUfH4kfFt6VZxV+ndaiYdUjr9E1/XWl/gLjAaqC4vlGV7Eu1KrRlaqgeL7RVawLtZpOur4AAAD//z8nWPYAAAAGSURBVAMAxtPAQ06klrkAAAAASUVORK5CYII=");
+}
+
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%}
+body{
+  font-family:'Poppins',system-ui,-apple-system,sans-serif;
+  background:var(--cinza-claro);
+  color:var(--texto);
+  font-size:14px;
+  line-height:1.55;
+  -webkit-font-smoothing:antialiased;
+}
+button,input,select,textarea{font-family:inherit;font-size:inherit;color:inherit}
+button{cursor:pointer;border:none;background:none}
+::-webkit-scrollbar{width:10px;height:10px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:#CBD5E1;border-radius:20px;border:3px solid transparent;background-clip:content-box}
+::-webkit-scrollbar-thumb:hover{background:#94A3B8;background-clip:content-box}
+:focus-visible{outline:2px solid var(--azul-principal);outline-offset:2px}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+
+/* ---------- Layout ---------- */
+.app{display:flex;min-height:100vh}
+
+.sidebar{
+  width:var(--sidebar);
+  flex-shrink:0;
+  background:linear-gradient(180deg,var(--azul-escuro) 0%,#0A1054 60%,var(--azul-medio) 100%);
+  color:#fff;
+  display:flex;flex-direction:column;
+  padding:26px 18px;
+  position:fixed;inset:0 auto 0 0;
+  z-index:60;
+  transition:transform var(--transicao), width var(--transicao), padding var(--transicao);
+}
+
+/* Estado recolhido (funciona também em tela cheia) */
+body.recolhida{--sidebar:80px}
+body.recolhida .sidebar{padding:26px 14px}
+body.recolhida .brand{justify-content:center;padding:0 0 26px}
+body.recolhida .brand-text,
+body.recolhida .nav-label,
+body.recolhida .nav-item span,
+body.recolhida .sidebar-rodape{display:none}
+body.recolhida .nav-item{justify-content:center;padding:12px 0}
+body.recolhida .nav{gap:6px}
+.brand{display:flex;align-items:center;gap:12px;padding:0 6px 26px}
+.logo-mark{
+  flex-shrink:0;border-radius:12px;
+  background-color:#110D32;background-image:var(--logo);
+  background-size:cover;background-position:center;background-repeat:no-repeat;
+}
+.brand .logo-mark{width:44px;height:44px;box-shadow:0 6px 18px rgba(5,10,52,.55);border:1px solid rgba(255,255,255,.1)}
+.brand-text b{display:block;font-size:14.5px;font-weight:600;letter-spacing:-.2px;line-height:1.3}
+.brand-text span{font-size:11px;color:var(--azul-claro);font-weight:400}
+
+.nav-label{font-size:10px;text-transform:uppercase;letter-spacing:1.2px;color:rgba(255,255,255,.42);padding:0 12px 10px;font-weight:500}
+.nav{display:flex;flex-direction:column;gap:4px}
+.nav-item{
+  display:flex;align-items:center;gap:12px;
+  padding:11px 14px;border-radius:var(--raio-sm);
+  color:rgba(255,255,255,.72);font-weight:500;font-size:13.5px;
+  text-align:left;width:100%;transition:var(--transicao);
+}
+.nav-item svg{width:18px;height:18px;flex-shrink:0;stroke-width:1.8}
+.nav-item:hover{background:rgba(255,255,255,.08);color:#fff}
+.nav-item.ativo{background:var(--azul-principal);color:#fff;box-shadow:0 6px 18px rgba(10,100,255,.4)}
+.sidebar-rodape{margin-top:auto;padding:16px 12px 0;border-top:1px solid rgba(255,255,255,.1);font-size:11px;color:rgba(255,255,255,.45)}
+
+.overlay{display:none;position:fixed;inset:0;background:rgba(5,10,52,.5);z-index:55;backdrop-filter:blur(2px)}
+.overlay.aberto{display:block}
+
+.conteudo{flex:1;margin-left:var(--sidebar);min-width:0;display:flex;flex-direction:column;transition:margin-left var(--transicao)}
+
+.topbar{
+  background:var(--branco);border-bottom:1px solid var(--borda);
+  padding:18px 32px;display:flex;align-items:center;gap:16px;
+  position:sticky;top:0;z-index:40;
+}
+.btn-menu{display:grid;width:38px;height:38px;border-radius:10px;background:var(--cinza-claro);place-items:center;color:var(--azul-escuro);transition:var(--transicao)}
+.btn-menu:hover{background:var(--azul-principal);color:#fff}
+.btn-menu svg{width:20px;height:20px;stroke-width:2}
+.topbar h1{font-size:20px;font-weight:600;letter-spacing:-.4px}
+.topbar p{font-size:12.5px;color:var(--texto-suave)}
+.topbar-acoes{margin-left:auto;display:flex;gap:10px;flex-wrap:wrap}
+
+.pagina{padding:28px 32px 56px;display:none;flex:1}
+.pagina.ativa{display:block;animation:sobe .3s ease}
+@keyframes sobe{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+/* ---------- Botões ---------- */
+.btn{
+  display:inline-flex;align-items:center;gap:8px;
+  padding:10px 18px;border-radius:var(--raio-sm);
+  font-weight:500;font-size:13px;transition:var(--transicao);white-space:nowrap;
+}
+.btn svg{width:16px;height:16px;stroke-width:2}
+.btn-primario{background:var(--azul-principal);color:#fff;box-shadow:0 4px 14px rgba(10,100,255,.28)}
+.btn-primario:hover{background:#0954D8;transform:translateY(-1px);box-shadow:0 8px 22px rgba(10,100,255,.35)}
+.btn-escuro{background:var(--azul-escuro);color:#fff}
+.btn-escuro:hover{background:var(--azul-medio)}
+.btn-claro{background:var(--branco);color:var(--azul-escuro);border:1px solid var(--borda);box-shadow:var(--sombra-sm)}
+.btn-claro:hover{border-color:var(--azul-claro);color:var(--azul-principal)}
+.btn-perigo{background:#FEF2F2;color:var(--vermelho)}
+.btn-perigo:hover{background:var(--vermelho);color:#fff}
+.btn-sm{padding:7px 12px;font-size:12px}
+
+.btn-icone{
+  width:32px;height:32px;border-radius:9px;display:grid;place-items:center;
+  background:var(--cinza-claro);color:var(--texto-suave);transition:var(--transicao);
+}
+.btn-icone svg{width:15px;height:15px;stroke-width:1.9}
+.btn-icone:hover{background:var(--azul-principal);color:#fff}
+.btn-icone.perigo:hover{background:var(--vermelho)}
+.btn-icone.ok:hover{background:var(--verde)}
+
+/* ---------- Cartões ---------- */
+.card{background:var(--branco);border-radius:var(--raio-lg);box-shadow:var(--sombra);border:1px solid rgba(229,233,240,.8)}
+.card-cabecalho{padding:20px 24px;border-bottom:1px solid var(--borda);display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.card-cabecalho h2{font-size:15.5px;font-weight:600;letter-spacing:-.2px}
+.card-cabecalho p{font-size:12px;color:var(--texto-suave)}
+.card-cabecalho .direita{margin-left:auto;display:flex;gap:10px;flex-wrap:wrap}
+.card-corpo{padding:24px}
+
+/* ---------- KPIs ---------- */
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:18px;margin-bottom:22px}
+.kpi{
+  background:var(--branco);border-radius:var(--raio-lg);padding:22px;
+  box-shadow:var(--sombra);border:1px solid rgba(229,233,240,.8);
+  position:relative;overflow:hidden;transition:var(--transicao);
+}
+.kpi:hover{transform:translateY(-3px);box-shadow:var(--sombra-md)}
+.kpi::after{content:'';position:absolute;inset:0 0 auto 0;height:4px;background:var(--cor,var(--azul-principal))}
+.kpi-topo{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.kpi-topo span{font-size:11.5px;font-weight:500;text-transform:uppercase;letter-spacing:.7px;color:var(--texto-suave)}
+.kpi-bolha{width:38px;height:38px;border-radius:11px;display:grid;place-items:center;background:var(--bg,rgba(10,100,255,.1));color:var(--cor,var(--azul-principal))}
+.kpi-bolha svg{width:19px;height:19px;stroke-width:1.9}
+.kpi-valor{font-size:32px;font-weight:600;letter-spacing:-1.4px;line-height:1}
+.kpi-nota{font-size:12px;color:var(--texto-suave);margin-top:6px}
+
+/* ---------- Gráficos ---------- */
+.graficos{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:18px}
+.grafico-caixa{height:290px;position:relative}
+.grafico-caixa canvas{max-height:100%}
+
+/* ---------- Filtros / formulários ---------- */
+.filtros{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;align-items:end}
+.campo{display:flex;flex-direction:column;gap:6px}
+.campo label{font-size:11.5px;font-weight:500;color:var(--texto-suave);letter-spacing:.2px}
+.campo label b{color:var(--vermelho);font-weight:500}
+.campo input,.campo select,.campo textarea{
+  width:100%;padding:10px 12px;border:1.5px solid var(--borda);border-radius:var(--raio-sm);
+  background:var(--branco);transition:var(--transicao);font-size:13px;
+}
+.campo textarea{resize:vertical;min-height:76px;line-height:1.5}
+.campo input:hover,.campo select:hover,.campo textarea:hover{border-color:#CFD8E3}
+.campo input:focus,.campo select:focus,.campo textarea:focus{outline:none;border-color:var(--azul-principal);box-shadow:0 0 0 4px rgba(10,100,255,.1)}
+.campo select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%236B7280' stroke-width='2.4' stroke-linecap='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:34px}
+
+.form-grade{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}
+.form-grade .col-2{grid-column:span 2}
+.form-secao{grid-column:span 2;display:flex;align-items:center;gap:10px;margin-top:4px}
+.form-secao span{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:1px;color:var(--azul-principal)}
+.form-secao i{flex:1;height:1px;background:var(--borda)}
+
+/* ---------- Tabelas ---------- */
+.tabela-rolagem{overflow-x:auto;border-radius:0 0 var(--raio-lg) var(--raio-lg)}
+table{width:100%;border-collapse:collapse;font-size:12.8px}
+thead th{
+  background:var(--cinza-claro);padding:13px 16px;text-align:left;
+  font-size:10.8px;font-weight:600;text-transform:uppercase;letter-spacing:.7px;
+  color:var(--texto-suave);white-space:nowrap;border-bottom:1px solid var(--borda);
+}
+tbody td{padding:14px 16px;border-bottom:1px solid #F1F4F8;vertical-align:middle}
+tbody tr:last-child td{border-bottom:none}
+tbody tr{transition:background .15s}
+tbody tr:hover{background:#FAFBFD}
+.td-nowrap{white-space:nowrap}
+.td-texto{max-width:250px;min-width:180px}
+.td-acoes{white-space:nowrap;text-align:right}
+.td-acoes>div{display:inline-flex;gap:6px}
+.celula-forte{font-weight:500;color:var(--azul-escuro)}
+.celula-sub{font-size:11.5px;color:var(--texto-suave)}
+
+.tag{display:inline-flex;align-items:center;gap:6px;padding:4px 11px;border-radius:20px;font-size:11px;font-weight:500;white-space:nowrap}
+.tag::before{content:'';width:6px;height:6px;border-radius:50%;background:currentColor}
+.tag-neutro{background:#EEF1F6;color:#5B6478}
+.tag-azul{background:rgba(10,100,255,.1);color:var(--azul-principal)}
+.tag-verde{background:rgba(15,169,104,.12);color:var(--verde)}
+.tag-amarelo{background:rgba(245,165,36,.14);color:#B97708}
+.tag-vermelho{background:rgba(229,72,77,.11);color:var(--vermelho)}
+.tag-roxo{background:rgba(124,92,252,.12);color:var(--roxo)}
+.tag-sigla{background:var(--azul-escuro);color:#fff;border-radius:7px;padding:3px 9px;font-size:10.5px;font-weight:600;letter-spacing:.5px}
+.tag-sigla::before{display:none}
+
+.vazio{padding:64px 24px;text-align:center}
+.vazio-icone{width:60px;height:60px;margin:0 auto 16px;border-radius:18px;background:var(--cinza-claro);display:grid;place-items:center;color:var(--azul-claro)}
+.vazio-icone svg{width:28px;height:28px;stroke-width:1.6}
+.vazio h3{font-size:15px;font-weight:600;margin-bottom:6px}
+.vazio p{font-size:13px;color:var(--texto-suave);max-width:380px;margin:0 auto 18px}
+
+/* ---------- Modal ---------- */
+.modal{
+  position:fixed;inset:0;z-index:80;display:none;
+  background:rgba(5,10,52,.55);backdrop-filter:blur(3px);
+  padding:24px;overflow-y:auto;
+}
+.modal.aberto{display:flex;align-items:flex-start;justify-content:center}
+.modal-caixa{
+  background:var(--branco);border-radius:var(--raio-lg);width:100%;max-width:860px;
+  margin:auto;box-shadow:var(--sombra-lg);animation:sobe .25s ease;
+}
+.modal-caixa.estreita{max-width:460px}
+.modal-cabecalho{padding:22px 26px;border-bottom:1px solid var(--borda);display:flex;align-items:center;gap:14px}
+.modal-cabecalho h2{font-size:17px;font-weight:600;letter-spacing:-.3px}
+.modal-cabecalho p{font-size:12px;color:var(--texto-suave)}
+.modal-fechar{margin-left:auto;width:34px;height:34px;border-radius:10px;display:grid;place-items:center;color:var(--texto-suave);background:var(--cinza-claro)}
+.modal-fechar:hover{background:#FEF2F2;color:var(--vermelho)}
+.modal-fechar svg{width:17px;height:17px;stroke-width:2}
+.modal-corpo{padding:26px;max-height:calc(100vh - 240px);overflow-y:auto}
+.modal-rodape{padding:18px 26px;border-top:1px solid var(--borda);display:flex;justify-content:flex-end;gap:10px;background:#FCFDFE;border-radius:0 0 var(--raio-lg) var(--raio-lg)}
+
+/* ---------- Boletim ---------- */
+.boletim{max-width:940px}
+.boletim-topo{
+  background:linear-gradient(120deg,var(--azul-escuro),var(--azul-medio));
+  color:#fff;padding:34px 38px;border-radius:var(--raio-lg) var(--raio-lg) 0 0;
+}
+.boletim-topo span{font-size:10.5px;text-transform:uppercase;letter-spacing:1.6px;color:var(--azul-claro);font-weight:500}
+.boletim-topo h2{font-size:26px;font-weight:600;letter-spacing:-.8px;margin:8px 0 6px}
+.boletim-topo p{font-size:13px;color:rgba(255,255,255,.72)}
+.boletim-corpo{padding:34px 38px}
+.boletim-secao{margin-bottom:30px}
+.boletim-secao:last-child{margin-bottom:0}
+.boletim-secao h3{
+  font-size:13px;font-weight:600;letter-spacing:.4px;text-transform:uppercase;
+  color:var(--azul-principal);margin-bottom:12px;padding-bottom:9px;border-bottom:2px solid var(--cinza-claro);
+}
+.boletim-secao p{font-size:13.8px;line-height:1.8;color:#2C3346;margin-bottom:10px;text-align:justify}
+.boletim-secao ul{list-style:none;margin:4px 0 12px}
+.boletim-secao li{
+  font-size:13.5px;line-height:1.7;color:#2C3346;padding:9px 0 9px 26px;position:relative;
+  border-bottom:1px dashed #EDF0F5;
+}
+.boletim-secao li:last-child{border-bottom:none}
+.boletim-secao li::before{
+  content:'';position:absolute;left:6px;top:17px;width:7px;height:7px;border-radius:2px;
+  background:var(--azul-claro);
+}
+.boletim-secao strong{font-weight:600;color:var(--azul-escuro)}
+.boletim-resumo{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:1px;background:var(--borda);border-radius:var(--raio);overflow:hidden;margin-bottom:28px}
+.boletim-resumo div{background:var(--cinza-claro);padding:16px 18px}
+.boletim-resumo b{display:block;font-size:22px;font-weight:600;letter-spacing:-.8px;color:var(--azul-escuro)}
+.boletim-resumo span{font-size:11px;color:var(--texto-suave);text-transform:uppercase;letter-spacing:.6px}
+
+/* ---------- Toast ---------- */
+.toasts{position:fixed;bottom:24px;right:24px;z-index:120;display:flex;flex-direction:column;gap:10px}
+.toast{
+  background:var(--azul-escuro);color:#fff;padding:13px 20px;border-radius:var(--raio-sm);
+  box-shadow:var(--sombra-lg);font-size:13px;font-weight:500;display:flex;align-items:center;gap:10px;
+  animation:entra .28s ease;max-width:340px;
+}
+.toast svg{width:17px;height:17px;flex-shrink:0;stroke-width:2.2}
+.toast.ok{background:var(--verde)}
+.toast.erro{background:var(--vermelho)}
+@keyframes entra{from{opacity:0;transform:translateX(30px)}to{opacity:1;transform:none}}
+
+/* ---------- Menu superior (três pontos) ---------- */
+.topbar .logo-mark{width:34px;height:34px;border-radius:10px;box-shadow:var(--sombra-sm)}
+.menu-superior{position:relative}
+.btn-pontos{
+  width:38px;height:38px;border-radius:11px;display:grid;place-items:center;
+  background:var(--cinza-claro);color:var(--azul-escuro);transition:var(--transicao);
+}
+.btn-pontos svg{width:19px;height:19px;stroke-width:2}
+.btn-pontos:hover,.btn-pontos.ativo{background:var(--azul-principal);color:#fff}
+.menu-flutuante{
+  position:absolute;top:calc(100% + 10px);right:0;min-width:238px;
+  background:var(--branco);border:1px solid var(--borda);border-radius:var(--raio);
+  box-shadow:var(--sombra-lg);padding:8px;z-index:50;display:none;
+}
+.menu-flutuante.aberto{display:block;animation:sobe .18s ease}
+.menu-flutuante button{
+  width:100%;display:flex;align-items:center;gap:11px;
+  padding:10px 12px;border-radius:var(--raio-sm);
+  font-size:13px;font-weight:500;color:var(--texto);text-align:left;transition:var(--transicao);
+}
+.menu-flutuante button svg{width:17px;height:17px;stroke-width:1.9;color:var(--azul-principal);flex-shrink:0}
+.menu-flutuante button:hover{background:var(--cinza-claro);color:var(--azul-principal)}
+.menu-flutuante hr{border:none;border-top:1px solid var(--borda);margin:6px 4px}
+
+/* ---------- Faixa de boas-vindas (tela inicial) ---------- */
+.hero{
+  display:flex;align-items:center;gap:18px;
+  background:linear-gradient(120deg,var(--azul-escuro),var(--azul-medio) 85%);
+  border-radius:var(--raio-lg);padding:22px 26px;margin-bottom:22px;
+  box-shadow:var(--sombra-md);color:#fff;
+}
+.hero .logo-mark{width:52px;height:52px;border-radius:14px;border:1px solid rgba(255,255,255,.14)}
+.hero-texto span{font-size:10.5px;text-transform:uppercase;letter-spacing:1.5px;color:var(--azul-claro);font-weight:500}
+.hero-texto h2{font-size:19px;font-weight:600;letter-spacing:-.4px;margin:3px 0 2px}
+.hero-texto p{font-size:12.5px;color:rgba(255,255,255,.68)}
+.hero-data{margin-left:auto;text-align:right;font-size:12px;color:rgba(255,255,255,.7);white-space:nowrap}
+.hero-data b{display:block;font-size:14px;font-weight:600;color:#fff;text-transform:capitalize}
+
+/* ---------- Abas internas ---------- */
+.abas{display:inline-flex;gap:4px;padding:4px;background:var(--cinza-claro);border-radius:12px;margin-bottom:20px}
+.aba{padding:9px 18px;border-radius:9px;font-size:13px;font-weight:500;color:var(--texto-suave);transition:var(--transicao)}
+.aba:hover{color:var(--azul-principal)}
+.aba.ativa{background:var(--branco);color:var(--azul-escuro);box-shadow:var(--sombra-sm)}
+.modulo{display:none}
+.modulo.ativo{display:block;animation:sobe .25s ease}
+
+/* ---------- Carteira comercial (checkboxes) ---------- */
+.carteira{
+  display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:8px;
+  max-height:230px;overflow-y:auto;padding:4px;
+  border:1.5px solid var(--borda);border-radius:var(--raio-sm);
+}
+.carteira-item{
+  display:flex;align-items:center;gap:10px;padding:9px 11px;border-radius:9px;
+  cursor:pointer;transition:var(--transicao);font-size:13px;
+}
+.carteira-item:hover{background:var(--cinza-claro)}
+.carteira-item input{
+  width:17px;height:17px;flex-shrink:0;accent-color:var(--azul-principal);cursor:pointer;margin:0;
+}
+.carteira-item span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.carteira-vazia{padding:18px;text-align:center;font-size:12.5px;color:var(--texto-suave)}
+.chips{display:flex;flex-wrap:wrap;gap:5px}
+
+/* ---------- Dica de filtro inteligente ---------- */
+.dica{
+  display:flex;align-items:center;gap:9px;margin-top:14px;padding:11px 14px;
+  background:rgba(10,100,255,.06);border:1px solid rgba(10,100,255,.16);
+  border-radius:var(--raio-sm);font-size:12.5px;color:var(--azul-escuro);
+}
+.dica svg{width:16px;height:16px;stroke-width:2;color:var(--azul-principal);flex-shrink:0}
+.dica b{font-weight:600}
+
+/* ---------- Matriz SWOT ---------- */
+.swot-grade{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}
+.swot-quadrante{
+  border:1.5px solid var(--borda);border-radius:var(--raio);overflow:hidden;
+  border-top:3px solid var(--cor);transition:var(--transicao);
+}
+.swot-quadrante:focus-within{border-color:var(--cor);box-shadow:0 0 0 4px rgba(10,100,255,.07)}
+.swot-titulo{display:flex;align-items:center;gap:9px;padding:12px 16px;background:var(--bg)}
+.swot-titulo b{font-size:12.5px;font-weight:600;color:var(--cor)}
+.swot-titulo span{font-size:11px;color:var(--texto-suave);margin-left:auto}
+.swot-quadrante textarea{
+  width:100%;border:none;padding:14px 16px;min-height:132px;resize:vertical;
+  font-size:13px;line-height:1.65;background:var(--branco);
+}
+.swot-quadrante textarea:focus{outline:none}
+
+/* ---------- Histórico ---------- */
+.historico{display:flex;flex-direction:column;gap:10px;max-height:520px;overflow-y:auto;padding-right:4px}
+.historico-item{
+  display:flex;align-items:center;gap:14px;width:100%;text-align:left;
+  padding:14px 16px;border:1.5px solid var(--borda);border-radius:var(--raio);
+  background:var(--branco);transition:var(--transicao);
+}
+.historico-item:hover{border-color:var(--azul-claro);box-shadow:var(--sombra);transform:translateY(-1px)}
+.historico-item.ativo{border-color:var(--azul-principal);background:rgba(10,100,255,.04)}
+.historico-info{min-width:0;flex:1}
+.historico-info b{display:block;font-size:13.5px;font-weight:600;color:var(--azul-escuro);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.historico-info span{font-size:11.5px;color:var(--texto-suave)}
+.historico-contagem{display:flex;gap:4px;flex-shrink:0}
+.pontinho{width:24px;height:24px;border-radius:7px;display:grid;place-items:center;font-size:10.5px;font-weight:600}
+
+/* ---------- Prévia de e-mail ---------- */
+.email-previa{border:1.5px solid var(--borda);border-radius:var(--raio);overflow:hidden}
+.email-assunto{padding:14px 18px;background:var(--cinza-claro);border-bottom:1px solid var(--borda);font-size:13px}
+.email-assunto span{font-size:10.5px;text-transform:uppercase;letter-spacing:.9px;color:var(--texto-suave);display:block;margin-bottom:3px}
+.email-assunto b{font-weight:600;color:var(--azul-escuro)}
+.email-corpo{
+  padding:20px 22px;font-size:13.2px;line-height:1.75;color:#2C3346;
+  white-space:pre-wrap;max-height:44vh;overflow-y:auto;background:var(--branco);
+}
+
+/* ---------- Filtro compacto em cabeçalho de cartão ---------- */
+.filtro-inline{display:flex;align-items:center;gap:9px}
+.filtro-inline label{font-size:11.5px;font-weight:500;color:var(--texto-suave);white-space:nowrap}
+.filtro-inline select{
+  padding:8px 32px 8px 12px;border:1.5px solid var(--borda);border-radius:var(--raio-sm);
+  background:var(--branco);font-size:12.5px;appearance:none;transition:var(--transicao);
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%236B7280' stroke-width='2.4' stroke-linecap='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 10px center;max-width:230px;
+}
+.filtro-inline select:hover{border-color:#CFD8E3}
+.filtro-inline select:focus{outline:none;border-color:var(--azul-principal);box-shadow:0 0 0 4px rgba(10,100,255,.1)}
+
+/* Filtros do histórico SWOT */
+.filtros-historico{display:grid;gap:12px;margin-bottom:16px}
+
+/* Selo de escopo do boletim */
+.selo-escopo{
+  display:inline-flex;align-items:center;gap:7px;padding:5px 13px;border-radius:20px;
+  background:rgba(115,198,255,.16);color:var(--azul-claro);
+  font-size:11px;font-weight:500;letter-spacing:.3px;margin-bottom:10px;
+}
+
+/* ---------- Backup ---------- */
+.backup-grade{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:18px}
+.backup-bloco{border:1.5px solid var(--borda);border-radius:var(--raio);padding:22px}
+.backup-bloco h3{display:flex;align-items:center;gap:10px;font-size:14px;font-weight:600;margin-bottom:8px}
+.backup-bloco h3 svg{width:18px;height:18px;stroke-width:1.9;color:var(--azul-principal)}
+.backup-bloco p{font-size:12.5px;color:var(--texto-suave);line-height:1.6;margin-bottom:16px}
+.backup-resumo{
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:1px;
+  background:var(--borda);border-radius:var(--raio);overflow:hidden;margin-bottom:20px;
+}
+.backup-resumo div{background:var(--cinza-claro);padding:14px 16px}
+.backup-resumo b{display:block;font-size:20px;font-weight:600;letter-spacing:-.7px;color:var(--azul-escuro)}
+.backup-resumo span{font-size:10.5px;color:var(--texto-suave);text-transform:uppercase;letter-spacing:.6px}
+.backup-aviso{
+  display:flex;gap:10px;margin-top:20px;padding:13px 16px;border-radius:var(--raio-sm);
+  background:rgba(245,165,36,.09);border:1px solid rgba(245,165,36,.25);
+  font-size:12.5px;line-height:1.6;color:#7A4E05;
+}
+.backup-aviso svg{width:17px;height:17px;stroke-width:2;color:var(--amarelo);flex-shrink:0;margin-top:2px}
+
+/* ---------- Responsivo ---------- */
+@media (max-width:1180px){
+  #gradeSwot{grid-template-columns:1fr!important}
+  .historico{max-height:none}
+}
+@media (max-width:1024px){
+  .sidebar{transform:translateX(-100%)}
+  .sidebar.aberta{transform:none}
+  .conteudo{margin-left:0}
+  /* Na gaveta mobile a sidebar sempre aparece expandida */
+  body.recolhida{--sidebar:260px}
+  body.recolhida .sidebar{padding:26px 18px}
+  body.recolhida .brand{justify-content:flex-start;padding:0 6px 26px}
+  body.recolhida .brand-text,
+  body.recolhida .nav-label,
+  body.recolhida .nav-item span,
+  body.recolhida .sidebar-rodape{display:block}
+  body.recolhida .nav-item{justify-content:flex-start;padding:11px 14px}
+}
+@media (max-width:720px){
+  .topbar{padding:14px 18px}
+  .topbar h1{font-size:17px}
+  .topbar p{display:none}
+  .topbar .logo-mark{display:none}
+  .pagina{padding:20px 18px 44px}
+  .form-grade{grid-template-columns:1fr}
+  .form-grade .col-2,.form-secao{grid-column:span 1}
+  .card-corpo{padding:18px}
+  .boletim-topo,.boletim-corpo{padding:24px 22px}
+  .boletim-topo h2{font-size:21px}
+  .toasts{left:18px;right:18px;bottom:18px}
+  .toast{max-width:none}
+  .hero{flex-wrap:wrap;padding:18px 20px}
+  .hero-data{margin-left:0;width:100%;text-align:left;padding-top:6px;border-top:1px solid rgba(255,255,255,.12)}
+  .swot-grade{grid-template-columns:1fr}
+  .abas{width:100%;overflow-x:auto}
+  .carteira{grid-template-columns:1fr}
+}
+
+/* ---------- Impressão ---------- */
+@media print{
+  .sidebar,.topbar,.overlay,.toasts,.card-cabecalho .direita{display:none!important}
+  .conteudo{margin:0}
+  .pagina{padding:0}
+  .card{box-shadow:none;border:none}
+}
+</style>
+</head>
+<body>
+
+<div class="app">
+
+  <!-- ====================== MENU LATERAL ====================== -->
+  <aside class="sidebar" id="sidebar">
+    <div class="brand">
+      <div class="logo-mark" role="img" aria-label="Logotipo"></div>
+      <div class="brand-text">
+        <b>Planejamento Comercial</b>
+      </div>
+    </div>
+
+    <p class="nav-label">Navegação</p>
+    <nav class="nav">
+      <button class="nav-item ativo" data-pagina="dashboard" title="Dashboard">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>
+        <span>Dashboard</span>
+      </button>
+      <button class="nav-item" data-pagina="plano" title="Plano 5W2H">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1.5"/><path d="M9 12h6M9 16h4"/></svg>
+        <span>Plano 5W2H</span>
+      </button>
+      <button class="nav-item" data-pagina="swot" title="Análise SWOT">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="3.5" width="17" height="17" rx="2.5"/><path d="M12 3.5v17M3.5 12h17"/></svg>
+        <span>Análise SWOT</span>
+      </button>
+      <button class="nav-item" data-pagina="boletim" title="Boletim">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4h11l3 3v13a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1z"/><path d="M8 10h8M8 14h8M8 18h5"/></svg>
+        <span>Boletim</span>
+      </button>
+    </nav>
+
+    <div class="sidebar-rodape">
+      Dados salvos localmente neste navegador.
+    </div>
+  </aside>
+  <div class="overlay" id="overlay"></div>
+
+  <!-- ====================== CONTEÚDO ====================== -->
+  <div class="conteudo">
+
+    <header class="topbar">
+      <button class="btn-menu" id="btnMenu" aria-label="Recolher ou expandir o menu" title="Recolher ou expandir o menu">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+      </button>
+      <div class="logo-mark" role="img" aria-label="Logotipo"></div>
+      <div>
+        <h1 id="tituloPagina">Dashboard</h1>
+        <p id="subtituloPagina">Visão consolidada dos planos de ação</p>
+      </div>
+      <div class="topbar-acoes" id="topbarAcoes">
+        <div class="menu-superior">
+          <button class="btn-pontos" id="btnMenuSuperior" aria-label="Mais opções" aria-haspopup="true" aria-expanded="false">
+            <svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="1.9"/><circle cx="12" cy="12" r="1.9"/><circle cx="12" cy="19" r="1.9"/></svg>
+          </button>
+          <div class="menu-flutuante" id="menuFlutuante" role="menu">
+            <button data-menu="configuracoes" role="menuitem">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-2.9 1.2V21a2 2 0 1 1-4 0v-.1A1.7 1.7 0 0 0 7 19.4a1.7 1.7 0 0 0-1.9.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1A1.7 1.7 0 0 0 3 14.1H3a2 2 0 1 1 0-4h.1A1.7 1.7 0 0 0 4.6 7a1.7 1.7 0 0 0-.3-1.9l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1A1.7 1.7 0 0 0 9 2.6h.1A2 2 0 0 1 13 3v.1a1.7 1.7 0 0 0 2.9 1.2l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0 1.2 2.9H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>
+              Configurações
+            </button>
+            <hr>
+            <button data-menu="boletim" role="menuitem">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4h11l3 3v13a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1z"/><path d="M8 11h8M8 15h5"/></svg>
+              Gerar boletim
+            </button>
+            <button data-menu="email" role="menuitem">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2.5"/><path d="M3.5 7l8.5 6 8.5-6"/></svg>
+              Enviar report por e-mail
+            </button>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- ---------- DASHBOARD ---------- -->
+    <section class="pagina ativa" id="pagina-dashboard">
+      <div class="hero">
+        <div class="logo-mark" role="img" aria-label="Logotipo"></div>
+        <div class="hero-texto">
+          <span>Gestão de planos de ação</span>
+          <h2>Painel gerencial 5W2H</h2>
+          <p id="heroResumo">Acompanhe execução, prazos e resultados em um só lugar.</p>
+        </div>
+        <div class="hero-data">
+          <b id="heroData">—</b>
+          <span id="heroHora">—</span>
+        </div>
+      </div>
+
+      <div class="kpis">
+        <div class="kpi" style="--cor:var(--azul-principal);--bg:rgba(10,100,255,.1)">
+          <div class="kpi-topo">
+            <span>Total de ações</span>
+            <div class="kpi-bolha"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16M4 12h16M4 18h10"/></svg></div>
+          </div>
+          <div class="kpi-valor" id="kpiTotal">0</div>
+          <div class="kpi-nota" id="kpiTotalNota">Nenhuma ação cadastrada</div>
+        </div>
+        <div class="kpi" style="--cor:var(--amarelo);--bg:rgba(245,165,36,.14)">
+          <div class="kpi-topo">
+            <span>Em andamento</span>
+            <div class="kpi-bolha"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><path d="M12 8v4l3 2"/></svg></div>
+          </div>
+          <div class="kpi-valor" id="kpiAndamento">0</div>
+          <div class="kpi-nota" id="kpiAndamentoNota">—</div>
+        </div>
+        <div class="kpi" style="--cor:var(--verde);--bg:rgba(15,169,104,.12)">
+          <div class="kpi-topo">
+            <span>Concluídas</span>
+            <div class="kpi-bolha"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><path d="M8.5 12.2l2.4 2.4 4.6-4.8"/></svg></div>
+          </div>
+          <div class="kpi-valor" id="kpiConcluidas">0</div>
+          <div class="kpi-nota" id="kpiConcluidasNota">—</div>
+        </div>
+        <div class="kpi" style="--cor:var(--vermelho);--bg:rgba(229,72,77,.11)">
+          <div class="kpi-topo">
+            <span>Atrasadas</span>
+            <div class="kpi-bolha"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M10.3 4.3L2.6 17.5A1.6 1.6 0 0 0 4 20h16a1.6 1.6 0 0 0 1.4-2.5L13.7 4.3a1.6 1.6 0 0 0-2.8 0z"/><path d="M12 9.5v4M12 16.8h.01"/></svg></div>
+          </div>
+          <div class="kpi-valor" id="kpiAtrasadas">0</div>
+          <div class="kpi-nota" id="kpiAtrasadasNota">—</div>
+        </div>
+      </div>
+
+      <div class="graficos">
+        <div class="card">
+          <div class="card-cabecalho">
+            <div><h2>Ações por status</h2><p>Distribuição da carteira atual</p></div>
+          </div>
+          <div class="card-corpo"><div class="grafico-caixa"><canvas id="graficoStatus"></canvas></div></div>
+        </div>
+        <div class="card">
+          <div class="card-cabecalho">
+            <div><h2>Ações por companhia</h2><p>Volume por seguradora</p></div>
+          </div>
+          <div class="card-corpo"><div class="grafico-caixa"><canvas id="graficoCompanhia"></canvas></div></div>
+        </div>
+        <div class="card" style="grid-column:1/-1">
+          <div class="card-cabecalho">
+            <div><h2>Ações por responsável</h2><p>Concluídas e pendentes por responsável</p></div>
+          </div>
+          <div class="card-corpo"><div class="grafico-caixa" style="height:320px"><canvas id="graficoResponsavel"></canvas></div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ---------- PLANO 5W2H ---------- -->
+    <section class="pagina" id="pagina-plano">
+      <div class="card" style="margin-bottom:20px">
+        <div class="card-cabecalho">
+          <div><h2>Filtros</h2><p>Refine a lista de ações</p></div>
+          <div class="direita">
+            <button class="btn btn-claro btn-sm" id="btnLimparFiltros">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+              Limpar filtros
+            </button>
+          </div>
+        </div>
+        <div class="card-corpo">
+          <div class="filtros">
+            <div class="campo">
+              <label for="filtroComercial">Comercial</label>
+              <select id="filtroComercial"><option value="">Todos</option></select>
+            </div>
+            <div class="campo">
+              <label for="filtroCompanhia">Companhia</label>
+              <select id="filtroCompanhia"><option value="">Todas</option></select>
+            </div>
+            <div class="campo">
+              <label for="filtroResponsavel">Responsável</label>
+              <select id="filtroResponsavel"><option value="">Todos</option></select>
+            </div>
+            <div class="campo">
+              <label for="filtroStatus">Status</label>
+              <select id="filtroStatus"><option value="">Todos</option></select>
+            </div>
+            <div class="campo">
+              <label for="filtroPrioridade">Prioridade</label>
+              <select id="filtroPrioridade"><option value="">Todas</option></select>
+            </div>
+          </div>
+          <div class="dica" id="dicaFiltro" style="display:none">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></svg>
+            <span id="dicaFiltroTexto"></span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-cabecalho">
+          <div><h2>Ações cadastradas</h2><p id="contadorAcoes">0 ações</p></div>
+          <div class="direita">
+            <button class="btn btn-claro btn-sm" id="btnExcel">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8l-5-5z"/><path d="M9.5 12.5l5 5M14.5 12.5l-5 5"/></svg>
+              Exportar Excel
+            </button>
+            <button class="btn btn-claro btn-sm" id="btnPdf">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8l-5-5z"/><path d="M9 13h6M9 17h4"/></svg>
+              Exportar PDF
+            </button>
+            <button class="btn btn-primario btn-sm" id="btnNovaAcao">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+              Nova ação
+            </button>
+          </div>
+        </div>
+        <div id="areaTabelaAcoes"></div>
+      </div>
+    </section>
+
+    <!-- ---------- ANÁLISE SWOT ---------- -->
+    <section class="pagina" id="pagina-swot">
+      <div style="display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:20px;align-items:start" id="gradeSwot">
+
+        <!-- Formulário / matriz -->
+        <div class="card">
+          <div class="card-cabecalho">
+            <div><h2 id="tituloSwot">Nova análise SWOT</h2><p id="subtituloSwot">Preencha um item por linha em cada quadrante</p></div>
+            <div class="direita">
+              <button class="btn btn-claro btn-sm" id="btnSwotNova" style="display:none">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+                Nova análise
+              </button>
+              <button class="btn btn-perigo btn-sm" id="btnSwotExcluir" style="display:none">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/></svg>
+                Excluir
+              </button>
+              <button class="btn btn-primario btn-sm" id="btnSwotSalvar">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M5 5h11l3 3v11H5z"/><path d="M8 5v5h6V5M8 19v-5h8v5"/></svg>
+                Salvar análise
+              </button>
+            </div>
+          </div>
+          <div class="card-corpo">
+            <div class="filtros" style="margin-bottom:20px">
+              <div class="campo">
+                <label for="swotCompanhia">Companhia <b>*</b></label>
+                <select id="swotCompanhia"></select>
+              </div>
+              <div class="campo">
+                <label for="swotData">Data <b>*</b></label>
+                <input type="date" id="swotData">
+              </div>
+              <div class="campo">
+                <label for="swotResponsavel">Responsável <b>*</b></label>
+                <input type="text" id="swotResponsavel" list="listaResponsaveis" placeholder="Nome do responsável">
+              </div>
+            </div>
+
+            <div class="swot-grade">
+              <div class="swot-quadrante" style="--cor:var(--verde);--bg:rgba(15,169,104,.08)">
+                <div class="swot-titulo">
+                  <b>Forças</b><span>Ambiente interno</span>
+                </div>
+                <textarea id="swotForcas" placeholder="Um item por linha&#10;Ex.: Prazo de aprovação abaixo da média"></textarea>
+              </div>
+              <div class="swot-quadrante" style="--cor:var(--vermelho);--bg:rgba(229,72,77,.07)">
+                <div class="swot-titulo">
+                  <b>Fraquezas</b><span>Ambiente interno</span>
+                </div>
+                <textarea id="swotFraquezas" placeholder="Um item por linha&#10;Ex.: Retrabalho no envio de documentos"></textarea>
+              </div>
+              <div class="swot-quadrante" style="--cor:var(--azul-principal);--bg:rgba(10,100,255,.07)">
+                <div class="swot-titulo">
+                  <b>Oportunidades</b><span>Ambiente externo</span>
+                </div>
+                <textarea id="swotOportunidades" placeholder="Um item por linha&#10;Ex.: Ampliação da carteira na região sul"></textarea>
+              </div>
+              <div class="swot-quadrante" style="--cor:var(--amarelo);--bg:rgba(245,165,36,.1)">
+                <div class="swot-titulo">
+                  <b>Ameaças</b><span>Ambiente externo</span>
+                </div>
+                <textarea id="swotAmeacas" placeholder="Um item por linha&#10;Ex.: Concorrência com prazo de pagamento menor"></textarea>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Histórico -->
+        <div class="card">
+          <div class="card-cabecalho">
+            <div><h2>Histórico</h2><p id="contadorSwot">0 análises</p></div>
+          </div>
+          <div class="card-corpo">
+            <div class="filtros-historico">
+              <div class="campo">
+                <label for="filtroSwotCompanhia">Companhia</label>
+                <select id="filtroSwotCompanhia"><option value="">Todas</option></select>
+              </div>
+              <div class="campo">
+                <label for="filtroSwotResponsavel">Responsável</label>
+                <select id="filtroSwotResponsavel"><option value="">Todos</option></select>
+              </div>
+            </div>
+            <div class="historico" id="areaHistoricoSwot"></div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ---------- CONFIGURAÇÕES ---------- -->
+    <section class="pagina" id="pagina-configuracoes">
+      <div class="abas">
+        <button class="aba ativa" data-modulo="comerciais">Comerciais</button>
+        <button class="aba" data-modulo="companhias">Companhias de Seguro</button>
+        <button class="aba" data-modulo="backup">Backup</button>
+      </div>
+
+      <!-- Módulo: Comerciais -->
+      <div class="modulo ativo" id="modulo-comerciais">
+        <div class="card">
+          <div class="card-cabecalho">
+            <div><h2>Comerciais</h2><p id="contadorComerciais">0 comerciais</p></div>
+            <div class="direita">
+              <button class="btn btn-primario btn-sm" id="btnNovoComercial">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+                Novo comercial
+              </button>
+            </div>
+          </div>
+          <div id="areaTabelaComerciais"></div>
+        </div>
+      </div>
+
+      <!-- Módulo: Companhias de Seguro -->
+      <div class="modulo" id="modulo-companhias">
+        <div class="card">
+          <div class="card-cabecalho">
+            <div><h2>Companhias de seguro</h2><p id="contadorCompanhias">0 companhias</p></div>
+            <div class="direita">
+              <button class="btn btn-primario btn-sm" id="btnNovaCompanhia">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+                Nova companhia
+              </button>
+            </div>
+          </div>
+          <div id="areaTabelaCompanhias"></div>
+        </div>
+      </div>
+
+      <!-- Módulo: Backup -->
+      <div class="modulo" id="modulo-backup">
+        <div class="card">
+          <div class="card-cabecalho">
+            <div><h2>Backup e compartilhamento</h2><p>Exporte todos os dados em JSON ou importe um arquivo recebido</p></div>
+          </div>
+          <div class="card-corpo">
+            <div class="backup-resumo" id="resumoBackup"></div>
+
+            <div class="backup-grade">
+              <div class="backup-bloco">
+                <h3>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="M8 11l4 4 4-4"/><path d="M4 19h16"/></svg>
+                  Exportar dados
+                </h3>
+                <p>Gera um arquivo <b>.json</b> com companhias, comerciais, ações e análises SWOT. Envie esse arquivo junto com o <b>index.html</b> para que a equipe veja exatamente os mesmos dados.</p>
+                <button class="btn btn-primario btn-sm" id="btnExportarJson">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="M8 11l4 4 4-4"/><path d="M4 19h16"/></svg>
+                  Baixar backup JSON
+                </button>
+              </div>
+
+              <div class="backup-bloco">
+                <h3>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V3"/><path d="M8 7l4-4 4 4"/><path d="M4 19h16"/></svg>
+                  Importar dados
+                </h3>
+                <p>Carrega um backup gerado por este sistema. Os dados atuais deste navegador serão <b>substituídos</b> pelo conteúdo do arquivo.</p>
+                <button class="btn btn-claro btn-sm" id="btnImportarJson">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V3"/><path d="M8 7l4-4 4 4"/><path d="M4 19h16"/></svg>
+                  Selecionar arquivo JSON
+                </button>
+                <input type="file" id="arquivoJson" accept=".json,application/json" style="display:none">
+              </div>
+            </div>
+
+            <div class="backup-aviso">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M10.3 4.3L2.6 17.5A1.6 1.6 0 0 0 4 20h16a1.6 1.6 0 0 0 1.4-2.5L13.7 4.3a1.6 1.6 0 0 0-2.8 0z"/><path d="M12 9.5v4M12 16.8h.01"/></svg>
+              <span>Os dados ficam no LocalStorage do navegador, ou seja, são individuais por máquina e por navegador. Limpar o histórico do navegador apaga o cadastro, então faça backups periódicos.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ---------- BOLETIM ---------- -->
+    <section class="pagina" id="pagina-boletim">
+      <div class="card boletim" id="caixaBoletim">
+        <div class="card-cabecalho">
+          <div><h2>Boletim</h2><p>Relatório executivo gerado a partir das ações e das análises SWOT</p></div>
+          <div class="direita">
+            <div class="filtro-inline">
+              <label for="boletimEscopo">Escopo</label>
+              <select id="boletimEscopo"></select>
+            </div>
+            <button class="btn btn-claro btn-sm" id="btnBoletimPdf" style="display:none">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8l-5-5z"/><path d="M9 13h6M9 17h4"/></svg>
+              Exportar PDF
+            </button>
+            <button class="btn btn-primario btn-sm" id="btnGerarBoletim">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v3M12 18v3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M3 12h3M18 12h3M4.9 19.1L7 17M17 7l2.1-2.1"/><circle cx="12" cy="12" r="3.2"/></svg>
+              Gerar boletim
+            </button>
+          </div>
+        </div>
+        <div id="areaBoletim"></div>
+      </div>
+    </section>
+
+  </div>
+</div>
+
+<!-- ====================== MODAL AÇÃO ====================== -->
+<div class="modal" id="modalAcao">
+  <div class="modal-caixa">
+    <div class="modal-cabecalho">
+      <div>
+        <h2 id="tituloModalAcao">Nova ação</h2>
+        <p>Preencha os campos do plano de ação 5W2H</p>
+      </div>
+      <button class="modal-fechar" data-fechar="modalAcao" aria-label="Fechar">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <div class="modal-corpo">
+      <div class="form-grade">
+        <div class="form-secao"><span>Identificação</span><i></i></div>
+        <div class="campo">
+          <label for="acaoData">Data <b>*</b></label>
+          <input type="date" id="acaoData">
+        </div>
+        <div class="campo">
+          <label for="acaoCompanhia">Companhia <b>*</b></label>
+          <select id="acaoCompanhia"></select>
+        </div>
+        <div class="campo">
+          <label for="acaoArea">Área</label>
+          <input type="text" id="acaoArea" placeholder="Ex.: Recuperação de Crédito">
+        </div>
+        <div class="campo">
+          <label for="acaoIndicador">Indicador</label>
+          <input type="text" id="acaoIndicador" placeholder="Ex.: Inadimplência acima de 90 dias">
+        </div>
+
+        <div class="form-secao"><span>5W2H</span><i></i></div>
+        <div class="campo col-2">
+          <label for="acaoWhat">What — o que será feito <b>*</b></label>
+          <textarea id="acaoWhat" placeholder="Descreva a ação a ser executada"></textarea>
+        </div>
+        <div class="campo col-2">
+          <label for="acaoWhy">Why — por que será feito</label>
+          <textarea id="acaoWhy" placeholder="Justificativa e ganho esperado"></textarea>
+        </div>
+        <div class="campo">
+          <label for="acaoWhere">Where — onde</label>
+          <input type="text" id="acaoWhere" placeholder="Ex.: Filial Maringá / Sistema de cobrança">
+        </div>
+        <div class="campo">
+          <label for="acaoWhen">When — prazo <b>*</b></label>
+          <input type="date" id="acaoWhen">
+        </div>
+        <div class="campo">
+          <label for="acaoWho">Who — responsável <b>*</b></label>
+          <input type="text" id="acaoWho" list="listaResponsaveis" placeholder="Nome do responsável">
+          <datalist id="listaResponsaveis"></datalist>
+        </div>
+        <div class="campo">
+          <label for="acaoHowMuch">How much — custo estimado (R$)</label>
+          <input type="number" id="acaoHowMuch" step="0.01" min="0" placeholder="0,00">
+        </div>
+        <div class="campo col-2">
+          <label for="acaoHow">How — como será feito</label>
+          <textarea id="acaoHow" placeholder="Etapas, método e recursos necessários"></textarea>
+        </div>
+
+        <div class="form-secao"><span>Acompanhamento</span><i></i></div>
+        <div class="campo">
+          <label for="acaoPrioridade">Prioridade</label>
+          <select id="acaoPrioridade"></select>
+        </div>
+        <div class="campo">
+          <label for="acaoStatus">Status</label>
+          <select id="acaoStatus"></select>
+        </div>
+        <div class="campo col-2">
+          <label for="acaoResultadoEsperado">Resultado esperado</label>
+          <textarea id="acaoResultadoEsperado" placeholder="Meta objetiva que caracteriza o sucesso da ação"></textarea>
+        </div>
+        <div class="campo col-2">
+          <label for="acaoResultadoObtido">Resultado obtido</label>
+          <textarea id="acaoResultadoObtido" placeholder="Preencha ao finalizar a ação"></textarea>
+        </div>
+        <div class="campo col-2">
+          <label for="acaoObservacoes">Observações</label>
+          <textarea id="acaoObservacoes" placeholder="Informações complementares"></textarea>
+        </div>
+      </div>
+    </div>
+    <div class="modal-rodape">
+      <button class="btn btn-claro" data-fechar="modalAcao">Cancelar</button>
+      <button class="btn btn-primario" id="btnSalvarAcao">Salvar ação</button>
+    </div>
+  </div>
+</div>
+
+<!-- ====================== MODAL COMERCIAL ====================== -->
+<div class="modal" id="modalComercial">
+  <div class="modal-caixa estreita">
+    <div class="modal-cabecalho">
+      <div>
+        <h2 id="tituloModalComercial">Novo comercial</h2>
+        <p>Nome e carteira de companhias atendidas</p>
+      </div>
+      <button class="modal-fechar" data-fechar="modalComercial" aria-label="Fechar">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <div class="modal-corpo">
+      <div class="form-grade" style="grid-template-columns:1fr">
+        <div class="campo">
+          <label for="comercialNome">Nome <b>*</b></label>
+          <input type="text" id="comercialNome" placeholder="Ex.: Gabriel Braun">
+        </div>
+        <div class="campo">
+          <label>Carteira comercial</label>
+          <div class="carteira" id="carteiraComercial"></div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-rodape">
+      <button class="btn btn-claro" data-fechar="modalComercial">Cancelar</button>
+      <button class="btn btn-primario" id="btnSalvarComercial">Salvar comercial</button>
+    </div>
+  </div>
+</div>
+
+<!-- ====================== MODAL COMPANHIA ====================== -->
+<div class="modal" id="modalCompanhia">
+  <div class="modal-caixa estreita">
+    <div class="modal-cabecalho">
+      <div>
+        <h2 id="tituloModalCompanhia">Nova companhia</h2>
+        <p>Seguradoras disponíveis no cadastro de ações</p>
+      </div>
+      <button class="modal-fechar" data-fechar="modalCompanhia" aria-label="Fechar">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <div class="modal-corpo">
+      <div class="form-grade" style="grid-template-columns:1fr">
+        <div class="campo">
+          <label for="compNome">Nome <b>*</b></label>
+          <input type="text" id="compNome" placeholder="Ex.: Porto Seguro">
+        </div>
+        <div class="campo">
+          <label for="compSigla">Sigla <b>*</b></label>
+          <input type="text" id="compSigla" maxlength="12" placeholder="Ex.: PORTO">
+        </div>
+        <div class="campo">
+          <label for="compObs">Observações</label>
+          <textarea id="compObs" placeholder="Contato, particularidades do contrato, etc."></textarea>
+        </div>
+      </div>
+    </div>
+    <div class="modal-rodape">
+      <button class="btn btn-claro" data-fechar="modalCompanhia">Cancelar</button>
+      <button class="btn btn-primario" id="btnSalvarCompanhia">Salvar companhia</button>
+    </div>
+  </div>
+</div>
+
+<!-- ====================== MODAL FINALIZAR ====================== -->
+<div class="modal" id="modalFinalizar">
+  <div class="modal-caixa estreita">
+    <div class="modal-cabecalho">
+      <div>
+        <h2>Finalizar ação</h2>
+        <p id="subFinalizar">Registre o resultado obtido</p>
+      </div>
+      <button class="modal-fechar" data-fechar="modalFinalizar" aria-label="Fechar">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <div class="modal-corpo">
+      <div class="campo">
+        <label for="finalizarResultado">Resultado obtido <b>*</b></label>
+        <textarea id="finalizarResultado" style="min-height:120px" placeholder="Descreva o que foi entregue e o efeito no indicador"></textarea>
+      </div>
+    </div>
+    <div class="modal-rodape">
+      <button class="btn btn-claro" data-fechar="modalFinalizar">Cancelar</button>
+      <button class="btn btn-primario" id="btnConfirmarFinalizar">Concluir ação</button>
+    </div>
+  </div>
+</div>
+
+<!-- ====================== MODAL CONFIRMAÇÃO ====================== -->
+<div class="modal" id="modalConfirmar">
+  <div class="modal-caixa estreita">
+    <div class="modal-cabecalho">
+      <div>
+        <h2 id="tituloConfirmar">Confirmar exclusão</h2>
+        <p id="textoConfirmar">Esta ação não pode ser desfeita.</p>
+      </div>
+      <button class="modal-fechar" data-fechar="modalConfirmar" aria-label="Fechar">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <div class="modal-rodape">
+      <button class="btn btn-claro" data-fechar="modalConfirmar">Cancelar</button>
+      <button class="btn btn-perigo" id="btnConfirmarExclusao">Excluir</button>
+    </div>
+  </div>
+</div>
+
+<!-- ====================== MODAL REPORT POR E-MAIL ====================== -->
+<div class="modal" id="modalEmail">
+  <div class="modal-caixa">
+    <div class="modal-cabecalho">
+      <div>
+        <h2>Enviar report por e-mail</h2>
+        <p>Resumo executivo montado a partir da análise SWOT</p>
+      </div>
+      <button class="modal-fechar" data-fechar="modalEmail" aria-label="Fechar">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <div class="modal-corpo">
+      <div class="campo" style="margin-bottom:20px">
+        <label for="emailAnalise">Análise SWOT</label>
+        <select id="emailAnalise"></select>
+      </div>
+      <div class="email-previa" id="previaEmail">
+        <div class="email-assunto">
+          <span>Assunto</span>
+          <b id="emailAssunto">—</b>
+        </div>
+        <div class="email-corpo" id="emailCorpo">—</div>
+      </div>
+    </div>
+    <div class="modal-rodape">
+      <button class="btn btn-claro" data-fechar="modalEmail">Fechar</button>
+      <button class="btn btn-claro" id="btnCopiarEmail">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h8"/></svg>
+        Copiar texto
+      </button>
+      <button class="btn btn-primario" id="btnAbrirEmail">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12l16-8-6 16-3-6-7-2z"/></svg>
+        Abrir no e-mail
+      </button>
+    </div>
+  </div>
+</div>
+
+<div class="toasts" id="toasts"></div>
+
+<!-- ==========================================================================
+     JAVASCRIPT
+     ========================================================================== -->
+<script>
+(function(){
+'use strict';
+
+/* =========================================================
+   1. CONSTANTES E ESTADO
+   ========================================================= */
+const CHAVE_COMPANHIAS = 'pa5w2h_companhias';
+const CHAVE_ACOES      = 'pa5w2h_acoes';
+const CHAVE_COMERCIAIS = 'pa5w2h_comerciais';
+const CHAVE_SWOT       = 'pa5w2h_swot';
+const CHAVE_SIDEBAR    = 'pa5w2h_sidebar';
+
+const STATUS      = ['Não iniciada','Em andamento','Concluída','Cancelada'];
+const PRIORIDADES = ['Alta','Média','Baixa'];
+
+const CORES = {
+  principal:'#0A64FF', escuro:'#050A34', medio:'#2021D4', claro:'#73C6FF',
+  verde:'#0FA968', amarelo:'#F5A524', vermelho:'#E5484D', roxo:'#7C5CFC', cinza:'#C3CBD8'
+};
+
+const PAGINAS = {
+  dashboard:     {titulo:'Dashboard',            subtitulo:'Visão consolidada dos planos de ação'},
+  plano:         {titulo:'Plano 5W2H',           subtitulo:'Cadastro e acompanhamento das ações'},
+  swot:          {titulo:'Análise SWOT',         subtitulo:'Diagnóstico estratégico por companhia'},
+  boletim:       {titulo:'Boletim',             subtitulo:'Relatório executivo automático'},
+  configuracoes: {titulo:'Configurações',        subtitulo:'Comerciais e companhias de seguro'}
+};
+
+let companhias = [];
+let acoes      = [];
+let comerciais = [];
+let swots      = [];
+let graficos   = {status:null, companhia:null, responsavel:null};
+let editandoAcao = null;
+let editandoCompanhia = null;
+let editandoComercial = null;
+let editandoSwot = null;
+let finalizandoId = null;
+let acaoConfirmada = null;
+let boletimAtual = null;   // último boletim gerado (reutilizado na exportação em PDF)
+
+/* =========================================================
+   2. UTILITÁRIOS
+   ========================================================= */
+const $  = (sel,ctx=document)=>ctx.querySelector(sel);
+const $$ = (sel,ctx=document)=>Array.from(ctx.querySelectorAll(sel));
+
+function gerarId(){
+  return Date.now().toString(36) + Math.random().toString(36).slice(2,7);
+}
+
+function escapar(txt){
+  return String(txt ?? '').replace(/[&<>"']/g, c => (
+    {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]
+  ));
+}
+
+function hoje(){
+  const d = new Date();
+  return new Date(d.getFullYear(), d.getMonth(), d.getDate());
+}
+
+function isoParaData(iso){
+  if(!iso) return null;
+  const [a,m,d] = iso.split('-').map(Number);
+  if(!a || !m || !d) return null;
+  return new Date(a, m-1, d);
+}
+
+function formatarData(iso){
+  const d = isoParaData(iso);
+  return d ? d.toLocaleDateString('pt-BR') : '—';
+}
+
+function formatarMoeda(valor){
+  const n = Number(valor);
+  if(!valor && valor !== 0) return '—';
+  if(isNaN(n)) return '—';
+  return n.toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+}
+
+function pct(parte,total){
+  if(!total) return 0;
+  return Math.round((parte/total)*100);
+}
+
+function plural(n, singular, pluralTxt){
+  return n === 1 ? `${n} ${singular}` : `${n} ${pluralTxt}`;
+}
+
+/** Escolhe aleatoriamente uma variação textual (evita boletins repetitivos). */
+function variar(opcoes){
+  return opcoes[Math.floor(Math.random()*opcoes.length)];
+}
+
+function listar(itens, conector = 'e'){
+  if(!itens.length) return '';
+  if(itens.length === 1) return itens[0];
+  return itens.slice(0,-1).join(', ') + ` ${conector} ` + itens[itens.length-1];
+}
+
+function toast(mensagem, tipo = 'ok'){
+  const icones = {
+    ok:'<path d="M20 6L9 17l-5-5"/>',
+    erro:'<circle cx="12" cy="12" r="9"/><path d="M12 8v4M12 16h.01"/>',
+    info:'<circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/>'
+  };
+  const el = document.createElement('div');
+  el.className = 'toast ' + tipo;
+  el.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">${icones[tipo]||icones.info}</svg><span>${escapar(mensagem)}</span>`;
+  $('#toasts').appendChild(el);
+  setTimeout(()=>{ el.style.opacity='0'; el.style.transform='translateX(30px)'; el.style.transition='.25s'; }, 2600);
+  setTimeout(()=>el.remove(), 2900);
+}
+
+/* =========================================================
+   3. PERSISTÊNCIA (LOCALSTORAGE)
+   ========================================================= */
+function carregarDados(){
+  try{
+    companhias = JSON.parse(localStorage.getItem(CHAVE_COMPANHIAS)) || [];
+    acoes      = JSON.parse(localStorage.getItem(CHAVE_ACOES)) || [];
+    comerciais = JSON.parse(localStorage.getItem(CHAVE_COMERCIAIS)) || [];
+    swots      = JSON.parse(localStorage.getItem(CHAVE_SWOT)) || [];
+  }catch(e){
+    companhias = []; acoes = []; comerciais = []; swots = [];
+    toast('Não foi possível ler os dados salvos. O sistema iniciou vazio.','erro');
+  }
+}
+
+function salvarComerciais(){
+  localStorage.setItem(CHAVE_COMERCIAIS, JSON.stringify(comerciais));
+}
+
+function salvarSwots(){
+  localStorage.setItem(CHAVE_SWOT, JSON.stringify(swots));
+}
+
+function salvarCompanhias(){
+  localStorage.setItem(CHAVE_COMPANHIAS, JSON.stringify(companhias));
+}
+
+function salvarAcoes(){
+  localStorage.setItem(CHAVE_ACOES, JSON.stringify(acoes));
+}
+
+/* =========================================================
+   4. REGRAS DE NEGÓCIO
+   ========================================================= */
+function nomeCompanhia(id){
+  const c = companhias.find(c => c.id === id);
+  return c ? c.nome : '—';
+}
+
+/* --- Carteira comercial --- */
+
+/** Companhias que compõem a carteira de um comercial. */
+function carteiraDo(comercialId){
+  const com = comerciais.find(c => c.id === comercialId);
+  return com ? (com.companhias || []) : [];
+}
+
+/** Comercial responsável por uma companhia (primeiro vínculo encontrado). */
+function comercialDaCompanhia(companhiaId){
+  return comerciais.find(c => (c.companhias || []).includes(companhiaId)) || null;
+}
+
+/* --- Análises SWOT --- */
+
+/** Converte um quadrante em lista de itens (um por linha). */
+function itensSwot(texto){
+  return String(texto || '')
+    .split('\n')
+    .map(l => l.replace(/^[-•*\s]+/,'').trim())
+    .filter(Boolean);
+}
+
+/** Análises ordenadas da mais recente para a mais antiga. */
+function swotsOrdenados(){
+  return swots.slice().sort((a,b) => (b.data || '').localeCompare(a.data || ''));
+}
+
+/** Análise SWOT mais recente de uma companhia. */
+function swotDaCompanhia(companhiaId){
+  return swotsOrdenados().find(s => s.companhiaId === companhiaId) || null;
+}
+
+function siglaCompanhia(id){
+  const c = companhias.find(c => c.id === id);
+  return c ? c.sigla : '—';
+}
+
+/** Ação atrasada: prazo vencido e ainda não concluída nem cancelada. */
+function estaAtrasada(acao){
+  if(acao.status === 'Concluída' || acao.status === 'Cancelada') return false;
+  const prazo = isoParaData(acao.when);
+  return !!prazo && prazo < hoje();
+}
+
+function diasDeAtraso(acao){
+  const prazo = isoParaData(acao.when);
+  if(!prazo) return 0;
+  return Math.max(0, Math.round((hoje() - prazo)/86400000));
+}
+
+function responsaveis(){
+  return [...new Set(acoes.map(a => a.who).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'pt-BR'));
+}
+
+function calcularMetricas(lista = acoes){
+  const total      = lista.length;
+  const porStatus  = {};
+  STATUS.forEach(s => porStatus[s] = lista.filter(a => a.status === s).length);
+  const atrasadas  = lista.filter(estaAtrasada);
+  const concluidas = porStatus['Concluída'];
+  return {
+    total,
+    porStatus,
+    naoIniciadas: porStatus['Não iniciada'],
+    andamento:    porStatus['Em andamento'],
+    concluidas,
+    canceladas:   porStatus['Cancelada'],
+    atrasadas:    atrasadas.length,
+    listaAtrasadas: atrasadas,
+    taxaConclusao: pct(concluidas, total)
+  };
+}
+
+function filtrosAtuais(){
+  return {
+    comercial:  $('#filtroComercial').value,
+    companhia:  $('#filtroCompanhia').value,
+    responsavel:$('#filtroResponsavel').value,
+    status:     $('#filtroStatus').value,
+    prioridade: $('#filtroPrioridade').value
+  };
+}
+
+function acoesFiltradas(){
+  const f = filtrosAtuais();
+  const carteira = f.comercial ? carteiraDo(f.comercial) : null;
+  return acoes.filter(a =>
+    (!carteira      || carteira.includes(a.companhiaId)) &&
+    (!f.companhia   || a.companhiaId === f.companhia) &&
+    (!f.responsavel || a.who === f.responsavel) &&
+    (!f.status      || (f.status === 'Atrasada' ? estaAtrasada(a) : a.status === f.status)) &&
+    (!f.prioridade  || a.prioridade === f.prioridade)
+  ).sort((a,b) => (a.when || '9999').localeCompare(b.when || '9999'));
+}
+
+/**
+ * Filtros inteligentes: ao escolher um comercial, o select de companhias passa a
+ * listar apenas a carteira dele; ao escolher uma companhia, o comercial
+ * responsável é identificado e exibido automaticamente.
+ */
+function aplicarFiltrosInteligentes(){
+  const comercialId = $('#filtroComercial').value;
+  const sel = $('#filtroCompanhia');
+  const anterior = sel.value;
+
+  const disponiveis = comercialId
+    ? companhias.filter(c => carteiraDo(comercialId).includes(c.id))
+    : companhias.slice();
+
+  sel.innerHTML = '<option value="">Todas</option>' + disponiveis
+    .sort((a,b) => a.nome.localeCompare(b.nome,'pt-BR'))
+    .map(c => `<option value="${c.id}">${escapar(c.nome)} (${escapar(c.sigla)})</option>`).join('');
+
+  // Mantém a companhia escolhida apenas se ela continuar disponível
+  sel.value = disponiveis.some(c => c.id === anterior) ? anterior : '';
+
+  atualizarDicaFiltro();
+}
+
+/** Mensagem contextual abaixo dos filtros. */
+function atualizarDicaFiltro(){
+  const comercialId = $('#filtroComercial').value;
+  const companhiaId = $('#filtroCompanhia').value;
+  const dica  = $('#dicaFiltro');
+  const texto = $('#dicaFiltroTexto');
+
+  if(companhiaId){
+    const com = comercialDaCompanhia(companhiaId);
+    texto.innerHTML = com
+      ? `Comercial responsável por <b>${escapar(nomeCompanhia(companhiaId))}</b>: <b>${escapar(com.nome)}</b>.`
+      : `<b>${escapar(nomeCompanhia(companhiaId))}</b> ainda não faz parte da carteira de nenhum comercial.`;
+    dica.style.display = 'flex';
+    return;
+  }
+
+  if(comercialId){
+    const carteira = carteiraDo(comercialId).map(nomeCompanhia);
+    const com = comerciais.find(c => c.id === comercialId);
+    texto.innerHTML = carteira.length
+      ? `Carteira de <b>${escapar(com.nome)}</b>: ${escapar(listar(carteira))}.`
+      : `<b>${escapar(com.nome)}</b> ainda não possui companhias na carteira. Configure em Configurações › Comerciais.`;
+    dica.style.display = 'flex';
+    return;
+  }
+
+  dica.style.display = 'none';
+}
+
+/* =========================================================
+   5. NAVEGAÇÃO E MODAIS
+   ========================================================= */
+function irPara(pagina){
+  $$('.nav-item').forEach(b => b.classList.toggle('ativo', b.dataset.pagina === pagina));
+  $$('.pagina').forEach(p => p.classList.toggle('ativa', p.id === 'pagina-' + pagina));
+  $('#tituloPagina').textContent    = PAGINAS[pagina].titulo;
+  $('#subtituloPagina').textContent = PAGINAS[pagina].subtitulo;
+  fecharSidebar();
+  fecharMenuSuperior();
+  window.scrollTo({top:0,behavior:'smooth'});
+  if(pagina === 'dashboard') renderizarDashboard();
+}
+
+/** Alterna os módulos da tela de Configurações. */
+function irParaModulo(modulo){
+  $$('.aba').forEach(a => a.classList.toggle('ativa', a.dataset.modulo === modulo));
+  $$('.modulo').forEach(m => m.classList.toggle('ativo', m.id === 'modulo-' + modulo));
+}
+
+function abrirSidebar(){ $('#sidebar').classList.add('aberta'); $('#overlay').classList.add('aberto'); }
+function fecharSidebar(){ $('#sidebar').classList.remove('aberta'); $('#overlay').classList.remove('aberto'); }
+
+/**
+ * O botão do menu tem dois comportamentos: em telas largas recolhe a sidebar
+ * para o modo de ícones; em telas estreitas abre a gaveta lateral.
+ */
+function alternarSidebar(){
+  if(window.innerWidth <= 1024){
+    abrirSidebar();
+    return;
+  }
+  const recolhida = document.body.classList.toggle('recolhida');
+  localStorage.setItem(CHAVE_SIDEBAR, recolhida ? 'recolhida' : 'expandida');
+  // Os gráficos precisam se readequar à nova largura disponível
+  setTimeout(() => Object.values(graficos).forEach(g => g && g.resize()), 260);
+}
+
+function restaurarSidebar(){
+  if(localStorage.getItem(CHAVE_SIDEBAR) === 'recolhida'){
+    document.body.classList.add('recolhida');
+  }
+}
+
+function alternarMenuSuperior(){
+  const menu = $('#menuFlutuante');
+  const aberto = menu.classList.toggle('aberto');
+  $('#btnMenuSuperior').classList.toggle('ativo', aberto);
+  $('#btnMenuSuperior').setAttribute('aria-expanded', aberto);
+}
+function fecharMenuSuperior(){
+  $('#menuFlutuante').classList.remove('aberto');
+  $('#btnMenuSuperior').classList.remove('ativo');
+  $('#btnMenuSuperior').setAttribute('aria-expanded','false');
+}
+
+function abrirModal(id){ $('#'+id).classList.add('aberto'); document.body.style.overflow='hidden'; }
+function fecharModal(id){
+  $('#'+id).classList.remove('aberto');
+  if(!$$('.modal.aberto').length) document.body.style.overflow='';
+}
+
+function confirmar(titulo, texto, rotulo, callback){
+  $('#tituloConfirmar').textContent = titulo;
+  $('#textoConfirmar').textContent  = texto;
+  $('#btnConfirmarExclusao').textContent = rotulo;
+  acaoConfirmada = callback;
+  abrirModal('modalConfirmar');
+}
+
+/* =========================================================
+   6. COMPANHIAS
+   ========================================================= */
+function abrirModalCompanhia(id = null){
+  editandoCompanhia = id;
+  const c = id ? companhias.find(c => c.id === id) : null;
+  $('#tituloModalCompanhia').textContent = c ? 'Editar companhia' : 'Nova companhia';
+  $('#compNome').value  = c ? c.nome  : '';
+  $('#compSigla').value = c ? c.sigla : '';
+  $('#compObs').value   = c ? c.observacoes : '';
+  abrirModal('modalCompanhia');
+  setTimeout(()=>$('#compNome').focus(), 80);
+}
+
+function salvarCompanhia(){
+  const nome  = $('#compNome').value.trim();
+  const sigla = $('#compSigla').value.trim().toUpperCase();
+
+  if(!nome)  return toast('Informe o nome da companhia.','erro');
+  if(!sigla) return toast('Informe a sigla da companhia.','erro');
+
+  const duplicada = companhias.some(c => c.id !== editandoCompanhia && c.sigla.toUpperCase() === sigla);
+  if(duplicada) return toast(`A sigla ${sigla} já está em uso.`,'erro');
+
+  const dados = {nome, sigla, observacoes:$('#compObs').value.trim()};
+
+  if(editandoCompanhia){
+    const i = companhias.findIndex(c => c.id === editandoCompanhia);
+    companhias[i] = {...companhias[i], ...dados};
+    toast('Companhia atualizada.');
+  }else{
+    companhias.push({id:gerarId(), ...dados});
+    toast('Companhia cadastrada.');
+  }
+
+  salvarCompanhias();
+  fecharModal('modalCompanhia');
+  renderizarCompanhias();
+  renderizarComerciais();
+  preencherSelects();
+  renderizarAcoes();
+  renderizarDashboard();
+}
+
+function excluirCompanhia(id){
+  const c = companhias.find(c => c.id === id);
+  const vinculadas = acoes.filter(a => a.companhiaId === id).length;
+  const analises   = swots.filter(s => s.companhiaId === id).length;
+  const texto = vinculadas
+    ? `${c.nome} possui ${plural(vinculadas,'ação vinculada','ações vinculadas')}. Remova ou reatribua essas ações antes de excluir a companhia.`
+    : `A companhia ${c.nome} será removida do cadastro${analises ? `, junto com ${plural(analises,'análise SWOT','análises SWOT')}` : ''}. Ela também sairá das carteiras comerciais.`;
+
+  if(vinculadas){
+    $('#tituloConfirmar').textContent = 'Exclusão bloqueada';
+    $('#textoConfirmar').textContent  = texto;
+    $('#btnConfirmarExclusao').style.display = 'none';
+    acaoConfirmada = null;
+    abrirModal('modalConfirmar');
+    return;
+  }
+
+  $('#btnConfirmarExclusao').style.display = '';
+  confirmar('Excluir companhia', texto, 'Excluir', () => {
+    companhias = companhias.filter(x => x.id !== id);
+    swots      = swots.filter(s => s.companhiaId !== id);
+    // Mantém a integridade das carteiras comerciais
+    comerciais = comerciais.map(com => ({...com, companhias:(com.companhias||[]).filter(x => x !== id)}));
+    salvarCompanhias();
+    salvarSwots();
+    salvarComerciais();
+    if(editandoSwot && !swots.some(s => s.id === editandoSwot)) limparFormularioSwot();
+    renderizarCompanhias();
+    renderizarComerciais();
+    renderizarSwots();
+    preencherSelects();
+    toast('Companhia excluída.');
+  });
+}
+
+function renderizarCompanhias(){
+  const area = $('#areaTabelaCompanhias');
+  $('#contadorCompanhias').textContent = plural(companhias.length,'companhia','companhias');
+
+  if(!companhias.length){
+    area.innerHTML = `
+      <div class="vazio">
+        <div class="vazio-icone"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 3v5c0 4.5-2.9 8.3-7 10-4.1-1.7-7-5.5-7-10V6l7-3z"/></svg></div>
+        <h3>Nenhuma companhia cadastrada</h3>
+        <p>Cadastre as seguradoras primeiro. Elas ficam disponíveis automaticamente no cadastro de ações.</p>
+        <button class="btn btn-primario" onclick="document.getElementById('btnNovaCompanhia').click()">Cadastrar primeira companhia</button>
+      </div>`;
+    return;
+  }
+
+  const linhas = companhias
+    .slice()
+    .sort((a,b)=>a.nome.localeCompare(b.nome,'pt-BR'))
+    .map(c => {
+      const qtd = acoes.filter(a => a.companhiaId === c.id).length;
+      const com = comercialDaCompanhia(c.id);
+      return `
+      <tr>
+        <td class="celula-forte">${escapar(c.nome)}</td>
+        <td><span class="tag tag-sigla">${escapar(c.sigla)}</span></td>
+        <td class="td-nowrap">${com ? escapar(com.nome) : '<span class="celula-sub">Sem comercial</span>'}</td>
+        <td class="td-texto">${c.observacoes ? escapar(c.observacoes) : '<span class="celula-sub">—</span>'}</td>
+        <td class="td-nowrap">${qtd ? plural(qtd,'ação','ações') : '<span class="celula-sub">Sem ações</span>'}</td>
+        <td class="td-acoes"><div>
+          <button class="btn-icone" data-editar-comp="${c.id}" title="Editar">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M16.5 3.5l4 4L8 20H4v-4L16.5 3.5z"/></svg>
+          </button>
+          <button class="btn-icone perigo" data-excluir-comp="${c.id}" title="Excluir">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/></svg>
+          </button>
+        </div></td>
+      </tr>`;
+    }).join('');
+
+  area.innerHTML = `
+    <div class="tabela-rolagem">
+      <table>
+        <thead><tr>
+          <th>Nome</th><th>Sigla</th><th>Comercial</th><th>Observações</th><th>Ações vinculadas</th><th style="text-align:right">Opções</th>
+        </tr></thead>
+        <tbody>${linhas}</tbody>
+      </table>
+    </div>`;
+}
+
+/* =========================================================
+   6.1 COMERCIAIS E CARTEIRA
+   ========================================================= */
+function abrirModalComercial(id = null){
+  editandoComercial = id;
+  const c = id ? comerciais.find(x => x.id === id) : null;
+  $('#tituloModalComercial').textContent = c ? 'Editar comercial' : 'Novo comercial';
+  $('#comercialNome').value = c ? c.nome : '';
+
+  // Monta os checkboxes da carteira a partir das companhias cadastradas
+  const selecionadas = c ? (c.companhias || []) : [];
+  const area = $('#carteiraComercial');
+
+  area.innerHTML = companhias.length
+    ? companhias
+        .slice()
+        .sort((a,b) => a.nome.localeCompare(b.nome,'pt-BR'))
+        .map(comp => `
+          <label class="carteira-item">
+            <input type="checkbox" value="${comp.id}" ${selecionadas.includes(comp.id) ? 'checked' : ''}>
+            <span title="${escapar(comp.nome)}">${escapar(comp.nome)}</span>
+          </label>`).join('')
+    : '<div class="carteira-vazia">Nenhuma companhia cadastrada. Use a aba Companhias de Seguro para incluir as seguradoras.</div>';
+
+  abrirModal('modalComercial');
+  setTimeout(()=>$('#comercialNome').focus(), 80);
+}
+
+function salvarComercial(){
+  const nome = $('#comercialNome').value.trim();
+  if(!nome) return toast('Informe o nome do comercial.','erro');
+
+  const duplicado = comerciais.some(c =>
+    c.id !== editandoComercial && c.nome.toLowerCase() === nome.toLowerCase());
+  if(duplicado) return toast(`${nome} já está cadastrado.`,'erro');
+
+  const carteira = $$('#carteiraComercial input:checked').map(i => i.value);
+
+  if(editandoComercial){
+    const i = comerciais.findIndex(c => c.id === editandoComercial);
+    comerciais[i] = {...comerciais[i], nome, companhias:carteira};
+    toast('Comercial atualizado.');
+  }else{
+    comerciais.push({id:gerarId(), nome, companhias:carteira});
+    toast('Comercial cadastrado.');
+  }
+
+  salvarComerciais();
+  fecharModal('modalComercial');
+  renderizarComerciais();
+  renderizarCompanhias();
+  preencherSelects();
+  renderizarAcoes();
+}
+
+function excluirComercial(id){
+  const c = comerciais.find(x => x.id === id);
+  $('#btnConfirmarExclusao').style.display = '';
+  confirmar('Excluir comercial',
+    `${c.nome} será removido e sua carteira deixará de existir. As ações e companhias permanecem cadastradas.`,
+    'Excluir',
+    () => {
+      comerciais = comerciais.filter(x => x.id !== id);
+      salvarComerciais();
+      renderizarComerciais();
+      renderizarCompanhias();
+      preencherSelects();
+      renderizarAcoes();
+      toast('Comercial excluído.');
+    });
+}
+
+function renderizarComerciais(){
+  const area = $('#areaTabelaComerciais');
+  $('#contadorComerciais').textContent = plural(comerciais.length,'comercial','comerciais');
+
+  if(!comerciais.length){
+    area.innerHTML = `
+      <div class="vazio">
+        <div class="vazio-icone"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="3.6"/><path d="M5 20c0-3.4 3.1-5.6 7-5.6s7 2.2 7 5.6"/></svg></div>
+        <h3>Nenhum comercial cadastrado</h3>
+        <p>Cadastre os comerciais e vincule as companhias que compõem a carteira de cada um.</p>
+        <button class="btn btn-primario" onclick="document.getElementById('btnNovoComercial').click()">Cadastrar primeiro comercial</button>
+      </div>`;
+    return;
+  }
+
+  const linhas = comerciais
+    .slice()
+    .sort((a,b) => a.nome.localeCompare(b.nome,'pt-BR'))
+    .map(c => {
+      const carteira = (c.companhias || []);
+      const chips = carteira.length
+        ? `<div class="chips">${carteira
+            .map(id => companhias.find(x => x.id === id))
+            .filter(Boolean)
+            .sort((a,b) => a.sigla.localeCompare(b.sigla,'pt-BR'))
+            .map(comp => `<span class="tag tag-sigla" title="${escapar(comp.nome)}">${escapar(comp.sigla)}</span>`).join('')}</div>`
+        : '<span class="celula-sub">Sem companhias na carteira</span>';
+
+      // Volume de ações de toda a carteira do comercial
+      const qtd = acoes.filter(a => carteira.includes(a.companhiaId)).length;
+
+      return `
+      <tr>
+        <td class="celula-forte">${escapar(c.nome)}</td>
+        <td>${chips}</td>
+        <td class="td-nowrap">${carteira.length ? plural(carteira.length,'companhia','companhias') : '—'}</td>
+        <td class="td-nowrap">${qtd ? plural(qtd,'ação','ações') : '<span class="celula-sub">Sem ações</span>'}</td>
+        <td class="td-acoes"><div>
+          <button class="btn-icone" data-editar-comercial="${c.id}" title="Editar e definir carteira">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M16.5 3.5l4 4L8 20H4v-4L16.5 3.5z"/></svg>
+          </button>
+          <button class="btn-icone perigo" data-excluir-comercial="${c.id}" title="Excluir">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/></svg>
+          </button>
+        </div></td>
+      </tr>`;
+    }).join('');
+
+  area.innerHTML = `
+    <div class="tabela-rolagem">
+      <table>
+        <thead><tr>
+          <th>Nome</th><th>Carteira comercial</th><th>Companhias</th><th>Ações da carteira</th><th style="text-align:right">Opções</th>
+        </tr></thead>
+        <tbody>${linhas}</tbody>
+      </table>
+    </div>`;
+}
+
+/* =========================================================
+   7. AÇÕES 5W2H
+   ========================================================= */
+function preencherSelects(){
+  // Companhias no formulário e no filtro
+  const opcoesComp = companhias
+    .slice()
+    .sort((a,b)=>a.nome.localeCompare(b.nome,'pt-BR'))
+    .map(c => `<option value="${c.id}">${escapar(c.nome)} (${escapar(c.sigla)})</option>`).join('');
+
+  const selAcao = $('#acaoCompanhia');
+  const valorAtual = selAcao.value;
+  selAcao.innerHTML = companhias.length
+    ? '<option value="">Selecione…</option>' + opcoesComp
+    : '<option value="">Cadastre uma companhia primeiro</option>';
+  if(valorAtual) selAcao.value = valorAtual;
+
+  // Companhia na análise SWOT
+  const selSwot = $('#swotCompanhia');
+  const swotAtual = selSwot.value;
+  selSwot.innerHTML = companhias.length
+    ? '<option value="">Selecione…</option>' + opcoesComp
+    : '<option value="">Cadastre uma companhia primeiro</option>';
+  if(swotAtual) selSwot.value = swotAtual;
+
+  // Comerciais no filtro
+  const fCom = $('#filtroComercial');
+  const fComAtual = fCom.value;
+  fCom.innerHTML = '<option value="">Todos</option>' + comerciais
+    .slice()
+    .sort((a,b)=>a.nome.localeCompare(b.nome,'pt-BR'))
+    .map(c => `<option value="${c.id}">${escapar(c.nome)}</option>`).join('');
+  fCom.value = comerciais.some(c => c.id === fComAtual) ? fComAtual : '';
+
+  // Responsáveis
+  const resp = responsaveis();
+  const fResp = $('#filtroResponsavel');
+  const fRespAtual = fResp.value;
+  fResp.innerHTML = '<option value="">Todos</option>' + resp.map(r => `<option value="${escapar(r)}">${escapar(r)}</option>`).join('');
+  fResp.value = resp.includes(fRespAtual) ? fRespAtual : '';
+  $('#listaResponsaveis').innerHTML = resp.map(r => `<option value="${escapar(r)}"></option>`).join('');
+
+  // Status e prioridade (uma única vez)
+  if(!$('#acaoStatus').options.length){
+    $('#acaoStatus').innerHTML      = STATUS.map(s => `<option value="${s}">${s}</option>`).join('');
+    $('#acaoPrioridade').innerHTML  = PRIORIDADES.map(p => `<option value="${p}">${p}</option>`).join('');
+    $('#filtroStatus').innerHTML    = '<option value="">Todos</option>' + STATUS.map(s => `<option value="${s}">${s}</option>`).join('') + '<option value="Atrasada">Atrasada (prazo vencido)</option>';
+    $('#filtroPrioridade').innerHTML= '<option value="">Todas</option>' + PRIORIDADES.map(p => `<option value="${p}">${p}</option>`).join('');
+  }
+
+  // Recalcula o filtro de companhias conforme a carteira selecionada
+  aplicarFiltrosInteligentes();
+  preencherEscopoBoletim();
+}
+
+function abrirModalAcao(id = null){
+  if(!companhias.length){
+    toast('Cadastre pelo menos uma companhia antes de criar ações.','erro');
+    irPara('configuracoes');
+    irParaModulo('companhias');
+    return;
+  }
+
+  editandoAcao = id;
+  const a = id ? acoes.find(x => x.id === id) : null;
+  $('#tituloModalAcao').textContent = a ? 'Editar ação' : 'Nova ação';
+
+  const campos = {
+    acaoData:'data', acaoCompanhia:'companhiaId', acaoArea:'area', acaoIndicador:'indicador',
+    acaoWhat:'what', acaoWhy:'why', acaoWhere:'where', acaoWhen:'when', acaoWho:'who',
+    acaoHow:'how', acaoHowMuch:'howMuch', acaoPrioridade:'prioridade', acaoStatus:'status',
+    acaoResultadoEsperado:'resultadoEsperado', acaoResultadoObtido:'resultadoObtido',
+    acaoObservacoes:'observacoes'
+  };
+  Object.entries(campos).forEach(([elId, prop]) => {
+    $('#'+elId).value = a ? (a[prop] ?? '') : '';
+  });
+
+  if(!a){
+    $('#acaoData').value       = new Date().toISOString().slice(0,10);
+    $('#acaoPrioridade').value = 'Média';
+    $('#acaoStatus').value     = 'Não iniciada';
+  }
+
+  abrirModal('modalAcao');
+  setTimeout(()=>$('#acaoData').focus(), 80);
+}
+
+function salvarAcao(){
+  const dados = {
+    data:              $('#acaoData').value,
+    companhiaId:       $('#acaoCompanhia').value,
+    area:              $('#acaoArea').value.trim(),
+    indicador:         $('#acaoIndicador').value.trim(),
+    what:              $('#acaoWhat').value.trim(),
+    why:               $('#acaoWhy').value.trim(),
+    where:             $('#acaoWhere').value.trim(),
+    when:              $('#acaoWhen').value,
+    who:               $('#acaoWho').value.trim(),
+    how:               $('#acaoHow').value.trim(),
+    howMuch:           $('#acaoHowMuch').value,
+    prioridade:        $('#acaoPrioridade').value,
+    status:            $('#acaoStatus').value,
+    resultadoEsperado: $('#acaoResultadoEsperado').value.trim(),
+    resultadoObtido:   $('#acaoResultadoObtido').value.trim(),
+    observacoes:       $('#acaoObservacoes').value.trim()
+  };
+
+  if(!dados.data)        return toast('Informe a data de abertura.','erro');
+  if(!dados.companhiaId) return toast('Selecione a companhia.','erro');
+  if(!dados.what)        return toast('Descreva o que será feito (What).','erro');
+  if(!dados.when)        return toast('Informe o prazo (When).','erro');
+  if(!dados.who)         return toast('Informe o responsável (Who).','erro');
+
+  if(editandoAcao){
+    const i = acoes.findIndex(a => a.id === editandoAcao);
+    acoes[i] = {...acoes[i], ...dados};
+    toast('Ação atualizada.');
+  }else{
+    acoes.push({id:gerarId(), ...dados});
+    toast('Ação cadastrada.');
+  }
+
+  salvarAcoes();
+  fecharModal('modalAcao');
+  preencherSelects();
+  renderizarAcoes();
+  renderizarComerciais();
+  renderizarDashboard();
+}
+
+function excluirAcao(id){
+  const a = acoes.find(x => x.id === id);
+  $('#btnConfirmarExclusao').style.display = '';
+  confirmar('Excluir ação',
+    `A ação "${(a.what||'').slice(0,80)}" será removida definitivamente.`,
+    'Excluir',
+    () => {
+      acoes = acoes.filter(x => x.id !== id);
+      salvarAcoes();
+      preencherSelects();
+      renderizarAcoes();
+      renderizarComerciais();
+      renderizarDashboard();
+      toast('Ação excluída.');
+    });
+}
+
+function abrirModalFinalizar(id){
+  const a = acoes.find(x => x.id === id);
+  finalizandoId = id;
+  $('#subFinalizar').textContent = (a.what || '').slice(0,90);
+  $('#finalizarResultado').value = a.resultadoObtido || '';
+  abrirModal('modalFinalizar');
+  setTimeout(()=>$('#finalizarResultado').focus(), 80);
+}
+
+function confirmarFinalizar(){
+  const resultado = $('#finalizarResultado').value.trim();
+  if(!resultado) return toast('Descreva o resultado obtido para finalizar.','erro');
+
+  const i = acoes.findIndex(a => a.id === finalizandoId);
+  acoes[i].resultadoObtido = resultado;
+  acoes[i].status = 'Concluída';
+  acoes[i].dataConclusao = new Date().toISOString().slice(0,10);
+
+  salvarAcoes();
+  fecharModal('modalFinalizar');
+  renderizarAcoes();
+  renderizarDashboard();
+  toast('Ação concluída.');
+}
+
+function tagStatus(acao){
+  if(estaAtrasada(acao)){
+    const d = diasDeAtraso(acao);
+    return `<span class="tag tag-vermelho" title="${plural(d,'dia de atraso','dias de atraso')}">Atrasada</span>`;
+  }
+  const mapa = {
+    'Não iniciada':'tag-neutro',
+    'Em andamento':'tag-azul',
+    'Concluída':'tag-verde',
+    'Cancelada':'tag-roxo'
+  };
+  return `<span class="tag ${mapa[acao.status]||'tag-neutro'}">${escapar(acao.status)}</span>`;
+}
+
+function tagPrioridade(p){
+  const mapa = {'Alta':'tag-vermelho','Média':'tag-amarelo','Baixa':'tag-verde'};
+  return `<span class="tag ${mapa[p]||'tag-neutro'}">${escapar(p||'—')}</span>`;
+}
+
+function renderizarAcoes(){
+  const lista = acoesFiltradas();
+  const area  = $('#areaTabelaAcoes');
+  const temFiltro = Object.values(filtrosAtuais()).some(Boolean);
+
+  $('#contadorAcoes').textContent = temFiltro
+    ? `${plural(lista.length,'ação','ações')} de ${acoes.length}`
+    : plural(lista.length,'ação','ações');
+
+  if(!acoes.length){
+    area.innerHTML = `
+      <div class="vazio">
+        <div class="vazio-icone"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="2.5"/><path d="M8 10h8M8 14h5"/></svg></div>
+        <h3>Nenhuma ação cadastrada</h3>
+        <p>Comece registrando a primeira ação do plano. Os indicadores e o boletim são calculados a partir daqui.</p>
+        <button class="btn btn-primario" onclick="document.getElementById('btnNovaAcao').click()">Cadastrar primeira ação</button>
+      </div>`;
+    return;
+  }
+
+  if(!lista.length){
+    area.innerHTML = `
+      <div class="vazio">
+        <div class="vazio-icone"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M16.5 16.5L21 21"/></svg></div>
+        <h3>Nenhuma ação corresponde aos filtros</h3>
+        <p>Ajuste os critérios de companhia, responsável, status ou prioridade para ver resultados.</p>
+        <button class="btn btn-claro" onclick="document.getElementById('btnLimparFiltros').click()">Limpar filtros</button>
+      </div>`;
+    return;
+  }
+
+  const linhas = lista.map(a => {
+    const concluida = a.status === 'Concluída' || a.status === 'Cancelada';
+    return `
+    <tr>
+      <td class="td-nowrap celula-sub">${formatarData(a.data)}</td>
+      <td class="td-nowrap"><span class="tag tag-sigla">${escapar(siglaCompanhia(a.companhiaId))}</span></td>
+      <td class="td-nowrap">${escapar(a.area) || '<span class="celula-sub">—</span>'}</td>
+      <td class="td-nowrap">${escapar(a.indicador) || '<span class="celula-sub">—</span>'}</td>
+      <td class="td-texto celula-forte">${escapar(a.what)}</td>
+      <td class="td-texto">${escapar(a.why) || '<span class="celula-sub">—</span>'}</td>
+      <td class="td-nowrap">${escapar(a.where) || '<span class="celula-sub">—</span>'}</td>
+      <td class="td-nowrap">${formatarData(a.when)}</td>
+      <td class="td-nowrap">${escapar(a.who)}</td>
+      <td class="td-texto">${escapar(a.how) || '<span class="celula-sub">—</span>'}</td>
+      <td class="td-nowrap">${formatarMoeda(a.howMuch)}</td>
+      <td>${tagPrioridade(a.prioridade)}</td>
+      <td>${tagStatus(a)}</td>
+      <td class="td-texto">${escapar(a.resultadoEsperado) || '<span class="celula-sub">—</span>'}</td>
+      <td class="td-texto">${escapar(a.resultadoObtido) || '<span class="celula-sub">—</span>'}</td>
+      <td class="td-texto">${escapar(a.observacoes) || '<span class="celula-sub">—</span>'}</td>
+      <td class="td-acoes"><div>
+        ${concluida ? '' : `
+        <button class="btn-icone ok" data-finalizar="${a.id}" title="Finalizar">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5l5 5L20 6.5"/></svg>
+        </button>`}
+        <button class="btn-icone" data-editar="${a.id}" title="Editar">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M16.5 3.5l4 4L8 20H4v-4L16.5 3.5z"/></svg>
+        </button>
+        <button class="btn-icone perigo" data-excluir="${a.id}" title="Excluir">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/></svg>
+        </button>
+      </div></td>
+    </tr>`;
+  }).join('');
+
+  area.innerHTML = `
+    <div class="tabela-rolagem">
+      <table>
+        <thead><tr>
+          <th>Data</th><th>Companhia</th><th>Área</th><th>Indicador</th>
+          <th>What</th><th>Why</th><th>Where</th><th>When</th><th>Who</th><th>How</th><th>How much</th>
+          <th>Prioridade</th><th>Status</th><th>Resultado esperado</th><th>Resultado obtido</th><th>Observações</th>
+          <th style="text-align:right">Opções</th>
+        </tr></thead>
+        <tbody>${linhas}</tbody>
+      </table>
+    </div>`;
+}
+
+/* =========================================================
+   8. DASHBOARD
+   ========================================================= */
+function renderizarDashboard(){
+  const m = calcularMetricas();
+
+  atualizarHero();
+
+  $('#kpiTotal').textContent      = m.total;
+  $('#kpiAndamento').textContent  = m.andamento;
+  $('#kpiConcluidas').textContent = m.concluidas;
+  $('#kpiAtrasadas').textContent  = m.atrasadas;
+
+  $('#kpiTotalNota').textContent = m.total
+    ? `${plural(companhias.length,'companhia','companhias')} · ${plural(responsaveis().length,'responsável','responsáveis')}`
+    : 'Nenhuma ação cadastrada';
+  $('#kpiAndamentoNota').textContent  = m.total ? `${pct(m.andamento,m.total)}% da carteira` : '—';
+  $('#kpiConcluidasNota').textContent = m.total ? `Taxa de conclusão de ${m.taxaConclusao}%` : '—';
+  $('#kpiAtrasadasNota').textContent  = m.atrasadas
+    ? `${plural(m.listaAtrasadas.filter(a=>a.prioridade==='Alta').length,'crítica','críticas')} de prioridade alta`
+    : (m.total ? 'Nenhum prazo vencido' : '—');
+
+  desenharGraficoStatus(m);
+  desenharGraficoCompanhia();
+  desenharGraficoResponsavel();
+}
+
+const opcoesBase = {
+  responsive:true,
+  maintainAspectRatio:false,
+  plugins:{
+    legend:{labels:{font:{family:'Poppins',size:11.5},color:'#6B7280',usePointStyle:true,pointStyle:'circle',padding:16,boxWidth:8}},
+    tooltip:{
+      backgroundColor:'#050A34', padding:12, cornerRadius:10, displayColors:false,
+      titleFont:{family:'Poppins',size:12.5,weight:'600'},
+      bodyFont:{family:'Poppins',size:12}
+    }
+  }
+};
+
+function eixos(){
+  return {
+    x:{grid:{display:false},border:{display:false},ticks:{font:{family:'Poppins',size:11},color:'#6B7280'}},
+    y:{beginAtZero:true,grid:{color:'#EEF1F6'},border:{display:false},ticks:{font:{family:'Poppins',size:11},color:'#6B7280',precision:0}}
+  };
+}
+
+function semDados(canvasId, mensagem){
+  const cv  = $('#'+canvasId);
+  const ctx = cv.getContext('2d');
+  ctx.clearRect(0,0,cv.width,cv.height);
+  ctx.font = '400 13px Poppins, sans-serif';
+  ctx.fillStyle = '#9AA4B5';
+  ctx.textAlign = 'center';
+  ctx.fillText(mensagem, cv.width/2, cv.height/2);
+}
+
+function desenharGraficoStatus(m){
+  if(graficos.status){ graficos.status.destroy(); graficos.status = null; }
+  if(!m.total) return semDados('graficoStatus','Sem ações para exibir');
+
+  const rotulos = [...STATUS, 'Atrasadas'];
+  const valores = [m.naoIniciadas, m.andamento, m.concluidas, m.canceladas, m.atrasadas];
+  const cores   = [CORES.cinza, CORES.principal, CORES.verde, CORES.roxo, CORES.vermelho];
+
+  graficos.status = new Chart($('#graficoStatus'), {
+    type:'doughnut',
+    data:{labels:rotulos, datasets:[{data:valores, backgroundColor:cores, borderWidth:3, borderColor:'#fff', hoverOffset:8}]},
+    options:{
+      ...opcoesBase,
+      cutout:'62%',
+      plugins:{
+        ...opcoesBase.plugins,
+        legend:{...opcoesBase.plugins.legend, position:'right'},
+        tooltip:{...opcoesBase.plugins.tooltip, callbacks:{
+          label:c => `${c.raw} ${c.raw === 1 ? 'ação' : 'ações'} · ${pct(c.raw, m.total)}% do total`
+        }}
+      }
+    }
+  });
+}
+
+function desenharGraficoCompanhia(){
+  if(graficos.companhia){ graficos.companhia.destroy(); graficos.companhia = null; }
+  if(!acoes.length) return semDados('graficoCompanhia','Sem ações para exibir');
+
+  const dados = companhias
+    .map(c => ({sigla:c.sigla, qtd:acoes.filter(a => a.companhiaId === c.id).length}))
+    .filter(d => d.qtd > 0)
+    .sort((a,b) => b.qtd - a.qtd);
+
+  if(!dados.length) return semDados('graficoCompanhia','Sem ações vinculadas a companhias');
+
+  graficos.companhia = new Chart($('#graficoCompanhia'), {
+    type:'bar',
+    data:{
+      labels:dados.map(d => d.sigla),
+      datasets:[{
+        label:'Ações', data:dados.map(d => d.qtd),
+        backgroundColor:CORES.principal, hoverBackgroundColor:CORES.medio,
+        borderRadius:8, maxBarThickness:44
+      }]
+    },
+    options:{
+      ...opcoesBase,
+      scales:eixos(),
+      plugins:{...opcoesBase.plugins, legend:{display:false}}
+    }
+  });
+}
+
+function desenharGraficoResponsavel(){
+  if(graficos.responsavel){ graficos.responsavel.destroy(); graficos.responsavel = null; }
+  if(!acoes.length) return semDados('graficoResponsavel','Sem ações para exibir');
+
+  const nomes = responsaveis();
+  if(!nomes.length) return semDados('graficoResponsavel','Sem responsáveis informados');
+
+  const dados = nomes.map(n => {
+    const dele = acoes.filter(a => a.who === n);
+    return {
+      nome:n,
+      concluidas: dele.filter(a => a.status === 'Concluída').length,
+      pendentes:  dele.filter(a => a.status !== 'Concluída' && a.status !== 'Cancelada' && !estaAtrasada(a)).length,
+      atrasadas:  dele.filter(estaAtrasada).length,
+      total: dele.length
+    };
+  }).sort((a,b) => b.total - a.total);
+
+  graficos.responsavel = new Chart($('#graficoResponsavel'), {
+    type:'bar',
+    data:{
+      labels:dados.map(d => d.nome),
+      datasets:[
+        {label:'Concluídas', data:dados.map(d=>d.concluidas), backgroundColor:CORES.verde,     borderRadius:6, maxBarThickness:22},
+        {label:'Pendentes',  data:dados.map(d=>d.pendentes),  backgroundColor:CORES.claro,     borderRadius:6, maxBarThickness:22},
+        {label:'Atrasadas',  data:dados.map(d=>d.atrasadas),  backgroundColor:CORES.vermelho,  borderRadius:6, maxBarThickness:22}
+      ]
+    },
+    options:{
+      ...opcoesBase,
+      indexAxis:'y',
+      scales:{
+        x:{stacked:true, beginAtZero:true, grid:{color:'#EEF1F6'}, border:{display:false}, ticks:{font:{family:'Poppins',size:11},color:'#6B7280',precision:0}},
+        y:{stacked:true, grid:{display:false}, border:{display:false}, ticks:{font:{family:'Poppins',size:11.5},color:'#374151'}}
+      },
+      plugins:{
+        ...opcoesBase.plugins,
+        tooltip:{...opcoesBase.plugins.tooltip, displayColors:true}
+      }
+    }
+  });
+}
+
+/* =========================================================
+   8.1 ANÁLISE SWOT
+   ========================================================= */
+const QUADRANTES = [
+  {campo:'forcas',        chave:'swotForcas',        rotulo:'Forças',        classe:'tag-verde'},
+  {campo:'fraquezas',     chave:'swotFraquezas',     rotulo:'Fraquezas',     classe:'tag-vermelho'},
+  {campo:'oportunidades', chave:'swotOportunidades', rotulo:'Oportunidades', classe:'tag-azul'},
+  {campo:'ameacas',       chave:'swotAmeacas',       rotulo:'Ameaças',       classe:'tag-amarelo'}
+];
+
+/** Limpa o formulário e volta ao modo de nova análise. */
+function limparFormularioSwot(){
+  editandoSwot = null;
+  $('#tituloSwot').textContent    = 'Nova análise SWOT';
+  $('#subtituloSwot').textContent = 'Preencha um item por linha em cada quadrante';
+  $('#swotCompanhia').value   = '';
+  $('#swotData').value        = new Date().toISOString().slice(0,10);
+  $('#swotResponsavel').value = '';
+  QUADRANTES.forEach(q => $('#'+q.chave).value = '');
+  $('#btnSwotNova').style.display    = 'none';
+  $('#btnSwotExcluir').style.display = 'none';
+  $$('.historico-item').forEach(el => el.classList.remove('ativo'));
+}
+
+/** Carrega uma análise do histórico no formulário para edição. */
+function abrirSwot(id){
+  const s = swots.find(x => x.id === id);
+  if(!s) return;
+
+  editandoSwot = id;
+  $('#tituloSwot').textContent    = 'Editando análise';
+  $('#subtituloSwot').textContent = `${nomeCompanhia(s.companhiaId)} · ${formatarData(s.data)} · ${s.responsavel}`;
+  $('#swotCompanhia').value   = s.companhiaId;
+  $('#swotData').value        = s.data;
+  $('#swotResponsavel').value = s.responsavel;
+  QUADRANTES.forEach(q => $('#'+q.chave).value = s[q.campo] || '');
+  $('#btnSwotNova').style.display    = '';
+  $('#btnSwotExcluir').style.display = '';
+
+  $$('.historico-item').forEach(el => el.classList.toggle('ativo', el.dataset.swot === id));
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function salvarSwot(){
+  const dados = {
+    companhiaId: $('#swotCompanhia').value,
+    data:        $('#swotData').value,
+    responsavel: $('#swotResponsavel').value.trim()
+  };
+  QUADRANTES.forEach(q => dados[q.campo] = $('#'+q.chave).value.trim());
+
+  if(!dados.companhiaId) return toast('Selecione a companhia da análise.','erro');
+  if(!dados.data)        return toast('Informe a data da análise.','erro');
+  if(!dados.responsavel) return toast('Informe o responsável pela análise.','erro');
+
+  const totalItens = QUADRANTES.reduce((s,q) => s + itensSwot(dados[q.campo]).length, 0);
+  if(!totalItens) return toast('Preencha ao menos um quadrante da matriz.','erro');
+
+  if(editandoSwot){
+    const i = swots.findIndex(s => s.id === editandoSwot);
+    swots[i] = {...swots[i], ...dados};
+    toast('Análise atualizada.');
+  }else{
+    const novo = {id:gerarId(), ...dados};
+    swots.push(novo);
+    editandoSwot = novo.id;
+    toast('Análise salva.');
+  }
+
+  salvarSwots();
+  renderizarSwots();
+  abrirSwot(editandoSwot);
+}
+
+function excluirSwot(){
+  if(!editandoSwot) return;
+  const s = swots.find(x => x.id === editandoSwot);
+  $('#btnConfirmarExclusao').style.display = '';
+  confirmar('Excluir análise SWOT',
+    `A análise de ${nomeCompanhia(s.companhiaId)} de ${formatarData(s.data)} será removida definitivamente.`,
+    'Excluir',
+    () => {
+      swots = swots.filter(x => x.id !== editandoSwot);
+      salvarSwots();
+      limparFormularioSwot();
+      renderizarSwots();
+      toast('Análise excluída.');
+    });
+}
+
+/** Responsáveis que aparecem nas análises SWOT. */
+function responsaveisSwot(){
+  return [...new Set(swots.map(s => s.responsavel).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'pt-BR'));
+}
+
+/** Análises que atendem aos filtros do histórico. */
+function swotsFiltrados(){
+  const comp = $('#filtroSwotCompanhia').value;
+  const resp = $('#filtroSwotResponsavel').value;
+  return swotsOrdenados().filter(s =>
+    (!comp || s.companhiaId === comp) &&
+    (!resp || s.responsavel === resp)
+  );
+}
+
+/** Mantém as opções dos filtros do histórico alinhadas com as análises salvas. */
+function preencherFiltrosSwot(){
+  const selComp = $('#filtroSwotCompanhia');
+  const compAtual = selComp.value;
+  const comIds = [...new Set(swots.map(s => s.companhiaId))];
+  selComp.innerHTML = '<option value="">Todas</option>' + companhias
+    .filter(c => comIds.includes(c.id))
+    .sort((a,b)=>a.nome.localeCompare(b.nome,'pt-BR'))
+    .map(c => `<option value="${c.id}">${escapar(c.nome)}</option>`).join('');
+  selComp.value = comIds.includes(compAtual) ? compAtual : '';
+
+  const selResp = $('#filtroSwotResponsavel');
+  const respAtual = selResp.value;
+  const resps = responsaveisSwot();
+  selResp.innerHTML = '<option value="">Todos</option>' +
+    resps.map(r => `<option value="${escapar(r)}">${escapar(r)}</option>`).join('');
+  selResp.value = resps.includes(respAtual) ? respAtual : '';
+}
+
+function renderizarSwots(){
+  preencherFiltrosSwot();
+  preencherEscopoBoletim();
+  const lista = swotsFiltrados();
+  const area  = $('#areaHistoricoSwot');
+  const filtrando = !!($('#filtroSwotCompanhia').value || $('#filtroSwotResponsavel').value);
+
+  $('#contadorSwot').textContent = filtrando
+    ? `${plural(lista.length,'análise','análises')} de ${swots.length}`
+    : plural(swots.length,'análise','análises');
+
+  if(!swots.length){
+    area.innerHTML = `
+      <div class="vazio" style="padding:36px 12px">
+        <div class="vazio-icone"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="3.5" width="17" height="17" rx="2.5"/><path d="M12 3.5v17M3.5 12h17"/></svg></div>
+        <h3>Nenhuma análise salva</h3>
+        <p style="margin-bottom:0">Preencha a matriz ao lado e clique em Salvar análise. O histórico aparece aqui.</p>
+      </div>`;
+    return;
+  }
+
+  if(!lista.length){
+    area.innerHTML = `
+      <div class="vazio" style="padding:36px 12px">
+        <div class="vazio-icone"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M16.5 16.5L21 21"/></svg></div>
+        <h3>Nada encontrado</h3>
+        <p style="margin-bottom:14px">Nenhuma análise corresponde aos filtros de companhia e responsável.</p>
+        <button class="btn btn-claro btn-sm" id="btnLimparFiltrosSwot">Limpar filtros</button>
+      </div>`;
+    $('#btnLimparFiltrosSwot').addEventListener('click', () => {
+      $('#filtroSwotCompanhia').value = '';
+      $('#filtroSwotResponsavel').value = '';
+      renderizarSwots();
+    });
+    return;
+  }
+
+  area.innerHTML = lista.map(s => {
+    const contagens = QUADRANTES.map(q =>
+      `<span class="tag ${q.classe} pontinho" title="${q.rotulo}">${itensSwot(s[q.campo]).length}</span>`
+    ).join('');
+
+    return `
+      <button class="historico-item ${s.id === editandoSwot ? 'ativo' : ''}" data-swot="${s.id}">
+        <div class="historico-info">
+          <b>${escapar(nomeCompanhia(s.companhiaId))}</b>
+          <span>${formatarData(s.data)} · ${escapar(s.responsavel)}</span>
+        </div>
+        <div class="historico-contagem">${contagens}</div>
+      </button>`;
+  }).join('');
+}
+
+
+/* =========================================================
+   9. BOLETIM GERENCIAL
+   ========================================================= */
+/** Monta as seções do boletim a partir dos dados cadastrados. */
+function montarBoletim(escopo = ''){
+  // escopo vazio = boletim gerencial (toda a base);
+  // escopo preenchido = boletim individual, restrito às ações e análises daquele responsável
+  const base       = escopo ? acoes.filter(a => a.who === escopo) : acoes;
+  const baseSwots  = escopo ? swots.filter(s => s.responsavel === escopo) : swots;
+  const baseSwotOrdenado = baseSwots.slice().sort((a,b) => (b.data || '').localeCompare(a.data || ''));
+
+  const m = calcularMetricas(base);
+  const totalComp = new Set(base.map(a => a.companhiaId)).size;
+  const nomes     = [...new Set(base.map(a => a.who).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'pt-BR'));
+  const agora     = new Date();
+
+  const datas = base.map(a => a.data).filter(Boolean).sort();
+  const prazos = base.map(a => a.when).filter(Boolean).sort();
+  const periodo = datas.length ? `${formatarData(datas[0])} a ${formatarData(datas[datas.length-1])}` : '—';
+
+  const custoTotal = base.reduce((s,a) => s + (Number(a.howMuch)||0), 0);
+  const altaPendente = base.filter(a => a.prioridade === 'Alta' && a.status !== 'Concluída' && a.status !== 'Cancelada');
+  const atrasadasOrdenadas = m.listaAtrasadas.slice().sort((a,b) => diasDeAtraso(b) - diasDeAtraso(a));
+  const semResultadoEsperado = base.filter(a => !a.resultadoEsperado);
+  const concluidasSemRegistro = base.filter(a => a.status === 'Concluída' && !a.resultadoObtido);
+  const proximas = base.filter(a => {
+    if(a.status === 'Concluída' || a.status === 'Cancelada') return false;
+    const p = isoParaData(a.when);
+    if(!p) return false;
+    const dias = Math.round((p - hoje())/86400000);
+    return dias >= 0 && dias <= 7;
+  });
+
+  // Desempenho por companhia e por responsável
+  const porCompanhia = companhias.map(c => {
+    const dela = base.filter(a => a.companhiaId === c.id);
+    return {
+      nome:c.nome, sigla:c.sigla, total:dela.length,
+      concluidas: dela.filter(a => a.status === 'Concluída').length,
+      atrasadas:  dela.filter(estaAtrasada).length,
+      taxa: pct(dela.filter(a => a.status === 'Concluída').length, dela.length)
+    };
+  }).filter(c => c.total > 0);
+
+  const porResponsavel = nomes.map(n => {
+    const dele = base.filter(a => a.who === n);
+    return {
+      nome:n, total:dele.length,
+      concluidas: dele.filter(a => a.status === 'Concluída').length,
+      atrasadas:  dele.filter(estaAtrasada).length,
+      taxa: pct(dele.filter(a => a.status === 'Concluída').length, dele.length)
+    };
+  });
+
+  const maiorVolume  = porCompanhia.slice().sort((a,b) => b.total - a.total)[0];
+  const maisAtrasos  = porCompanhia.slice().sort((a,b) => b.atrasadas - a.atrasadas)[0];
+  const melhoresResp = porResponsavel.filter(r => r.total >= 2 && r.taxa >= 70).sort((a,b) => b.taxa - a.taxa);
+  const respAtrasados= porResponsavel.filter(r => r.atrasadas > 0).sort((a,b) => b.atrasadas - a.atrasadas);
+  const compCompletas= porCompanhia.filter(c => c.total >= 2 && c.taxa === 100);
+
+  /* ---- Insumos das análises SWOT ---- */
+  const compComSwot   = [...new Set(baseSwots.map(s => s.companhiaId))];
+  const compSemSwot   = companhias.filter(c => base.some(a => a.companhiaId === c.id) && !compComSwot.includes(c.id));
+  const somaQuadrante = campo => baseSwots.reduce((t,s) => t + itensSwot(s[campo]).length, 0);
+  const totalForcas        = somaQuadrante('forcas');
+  const totalFraquezas     = somaQuadrante('fraquezas');
+  const totalOportunidades = somaQuadrante('oportunidades');
+  const totalAmeacas       = somaQuadrante('ameacas');
+  const totalItensSwot     = totalForcas + totalFraquezas + totalOportunidades + totalAmeacas;
+  const swotRecente        = baseSwotOrdenado[0] || null;
+
+  // Companhias cujo diagnóstico é predominantemente de risco (fraquezas + ameaças)
+  const swotCritico = baseSwotOrdenado.filter(s => {
+    const risco = itensSwot(s.fraquezas).length + itensSwot(s.ameacas).length;
+    const favor = itensSwot(s.forcas).length + itensSwot(s.oportunidades).length;
+    return risco > favor;
+  });
+  const swotFavoravel = baseSwotOrdenado.filter(s => {
+    const risco = itensSwot(s.fraquezas).length + itensSwot(s.ameacas).length;
+    const favor = itensSwot(s.forcas).length + itensSwot(s.oportunidades).length;
+    return favor > risco && favor >= 2;
+  });
+
+  /* ---- Insumos da carteira comercial ---- */
+  const porComercial = comerciais.map(com => {
+    const carteira = com.companhias || [];
+    const dele = base.filter(a => carteira.includes(a.companhiaId));
+    return {
+      nome: com.nome,
+      companhias: carteira.length,
+      total: dele.length,
+      concluidas: dele.filter(a => a.status === 'Concluída').length,
+      atrasadas:  dele.filter(estaAtrasada).length,
+      taxa: pct(dele.filter(a => a.status === 'Concluída').length, dele.length)
+    };
+  }).filter(c => c.total > 0);
+  const comercialCritico = porComercial.slice().sort((a,b) => b.atrasadas - a.atrasadas)[0];
+  const comercialDestaque= porComercial.filter(c => c.total >= 2).sort((a,b) => b.taxa - a.taxa)[0];
+
+  /* ---- Panorama geral ---- */
+  const panorama = [];
+  panorama.push(
+    `${variar(['O plano de ação consolidado reúne','A carteira de planos de ação contempla','O portfólio de ações em acompanhamento contempla'])} ` +
+    `<strong>${plural(m.total,'ação','ações')}</strong> ${variar(['distribuídas entre','vinculadas a','que envolvem'])} ` +
+    `<strong>${plural(totalComp,'companhia','companhias')}</strong> e <strong>${plural(nomes.length,'responsável','responsáveis')}</strong>, ` +
+    `com registros no período de <strong>${periodo}</strong>.`
+  );
+
+  if(m.taxaConclusao >= 70){
+    panorama.push(`A taxa de conclusão alcança <strong>${m.taxaConclusao}%</strong>, patamar que ${variar(['indica boa aderência ao cronograma pactuado','demonstra maturidade na execução do plano','sinaliza disciplina de execução pelas áreas envolvidas'])}.`);
+  }else if(m.taxaConclusao >= 40){
+    panorama.push(`A taxa de conclusão está em <strong>${m.taxaConclusao}%</strong>, o que ${variar(['coloca o plano em estágio intermediário de execução','indica avanço parcial frente ao escopo previsto','exige atenção para sustentar o ritmo de entregas'])}.`);
+  }else{
+    panorama.push(`A taxa de conclusão permanece em <strong>${m.taxaConclusao}%</strong>, ${variar(['nível que recomenda reforço na priorização das entregas','indicando que a maior parte do escopo ainda está em aberto','o que exige repactuação de prazos com as áreas responsáveis'])}.`);
+  }
+
+  if(custoTotal > 0){
+    panorama.push(`O investimento estimado declarado nas ações totaliza <strong>${formatarMoeda(custoTotal)}</strong>${m.concluidas ? `, dos quais parte já foi aplicada nas ${m.concluidas} ${m.concluidas===1?'ação concluída':'ações concluídas'}` : ''}.`);
+  }
+
+  if(porComercial.length){
+    panorama.push(
+      `${variar(['A distribuição por carteira comercial abrange','Sob a ótica das carteiras comerciais, o plano envolve','A leitura por carteira comercial contempla'])} ` +
+      `<strong>${plural(porComercial.length,'comercial com ações em curso','comerciais com ações em curso')}</strong>` +
+      (comercialDestaque ? `, com destaque para <strong>${escapar(comercialDestaque.nome)}</strong> (${comercialDestaque.taxa}% de conclusão em ${plural(comercialDestaque.total,'ação','ações')})` : '') + '.'
+    );
+  }
+
+  if(baseSwots.length){
+    panorama.push(
+      `${variar(['O diagnóstico estratégico conta com','Somam-se a isso','O plano é sustentado por'])} ` +
+      `<strong>${plural(baseSwots.length,'análise SWOT registrada','análises SWOT registradas')}</strong>, cobrindo ${plural(compComSwot.length,'companhia','companhias')} e ` +
+      `${plural(totalItensSwot,'apontamento','apontamentos')} entre forças, fraquezas, oportunidades e ameaças` +
+      (swotRecente ? `. A avaliação mais recente é de <strong>${escapar(nomeCompanhia(swotRecente.companhiaId))}</strong>, elaborada em ${formatarData(swotRecente.data)} por ${escapar(swotRecente.responsavel)}` : '') + '.'
+    );
+  }else{
+    panorama.push(variar([
+      'Ainda não há análises SWOT registradas, o que limita a leitura estratégica do cenário de cada companhia.',
+      'O plano não possui diagnóstico SWOT associado; a análise permanece restrita à execução das ações.',
+      'Sem análises SWOT cadastradas, o boletim se apoia exclusivamente nos dados de execução.'
+    ]));
+  }
+
+  /* ---- Situação das ações ---- */
+  const situacaoItens = [];
+  STATUS.forEach(s => {
+    const q = m.porStatus[s];
+    if(q > 0) situacaoItens.push(`<strong>${s}:</strong> ${plural(q,'ação','ações')} (${pct(q,m.total)}% do total).`);
+  });
+  if(m.atrasadas > 0){
+    const maior = atrasadasOrdenadas[0];
+    situacaoItens.push(`<strong>Prazo vencido:</strong> ${plural(m.atrasadas,'ação','ações')} com prazo expirado, sendo o maior atraso de ${plural(diasDeAtraso(maior),'dia','dias')} (${escapar(siglaCompanhia(maior.companhiaId))} · ${escapar(maior.who)}).`);
+  }
+  if(proximas.length){
+    situacaoItens.push(`<strong>Vencimento nos próximos 7 dias:</strong> ${plural(proximas.length,'ação','ações')} exigem acompanhamento imediato.`);
+  }
+
+  const situacaoTexto = m.atrasadas === 0
+    ? variar(['Nenhuma ação apresenta prazo vencido na data desta apuração.','Todos os prazos vigentes estão dentro do previsto.','Não há registros de descumprimento de prazo neste ciclo.'])
+    : `${variar(['Do total apurado','Da carteira em acompanhamento','Considerando o escopo vigente'])}, <strong>${pct(m.atrasadas,m.total)}%</strong> das ações encontram-se com prazo vencido.`;
+
+  /* ---- Pontos de atenção ---- */
+  const atencao = [];
+  atrasadasOrdenadas.slice(0,5).forEach(a => {
+    atencao.push(`<strong>${escapar(siglaCompanhia(a.companhiaId))}</strong> — ${escapar((a.what||'').slice(0,110))}: ${plural(diasDeAtraso(a),'dia de atraso','dias de atraso')}, sob responsabilidade de ${escapar(a.who)} (prioridade ${escapar(a.prioridade||'não definida').toLowerCase()}).`);
+  });
+  if(m.listaAtrasadas.length > 5){
+    atencao.push(`Outras ${m.listaAtrasadas.length - 5} ações também constam com prazo vencido e integram a lista completa do plano.`);
+  }
+  if(altaPendente.length){
+    atencao.push(`${plural(altaPendente.length,'ação de prioridade alta','ações de prioridade alta')} permanecem em aberto e ${variar(['concentram o maior risco do plano','devem ser tratadas com precedência','requerem decisão da gestão'])}.`);
+  }
+  if(maisAtrasos && maisAtrasos.atrasadas >= 2){
+    atencao.push(`A companhia <strong>${escapar(maisAtrasos.nome)}</strong> concentra ${plural(maisAtrasos.atrasadas,'ação atrasada','ações atrasadas')}, o maior volume do plano.`);
+  }
+  if(respAtrasados.length && respAtrasados[0].atrasadas >= 2){
+    atencao.push(`O responsável <strong>${escapar(respAtrasados[0].nome)}</strong> acumula ${plural(respAtrasados[0].atrasadas,'pendência com prazo vencido','pendências com prazo vencido')}, o que sugere revisão de carga de trabalho.`);
+  }
+  if(semResultadoEsperado.length){
+    atencao.push(`${plural(semResultadoEsperado.length,'ação está','ações estão')} sem resultado esperado descrito, o que ${variar(['impede a medição objetiva da entrega','dificulta a validação do encerramento','fragiliza o controle de efetividade'])}.`);
+  }
+  if(concluidasSemRegistro.length){
+    atencao.push(`${plural(concluidasSemRegistro.length,'ação concluída','ações concluídas')} não possuem resultado obtido registrado.`);
+  }
+  if(m.canceladas > 0){
+    atencao.push(`${plural(m.canceladas,'ação foi cancelada','ações foram canceladas')}; recomenda-se registrar a justificativa nas observações para rastreabilidade.`);
+  }
+  if(comercialCritico && comercialCritico.atrasadas >= 2){
+    atencao.push(`A carteira de <strong>${escapar(comercialCritico.nome)}</strong> acumula ${plural(comercialCritico.atrasadas,'ação com prazo vencido','ações com prazo vencido')}, exigindo alinhamento com o comercial responsável.`);
+  }
+  swotCritico.slice(0,3).forEach(s => {
+    const fr = itensSwot(s.fraquezas), am = itensSwot(s.ameacas);
+    const principais = [...fr.slice(0,2), ...am.slice(0,1)];
+    atencao.push(`O diagnóstico SWOT de <strong>${escapar(nomeCompanhia(s.companhiaId))}</strong> concentra ${plural(fr.length + am.length,'apontamento de risco','apontamentos de risco')}${principais.length ? `, destacando-se ${escapar(listar(principais.map(t => t.toLowerCase())))}` : ''}.`);
+  });
+  if(compSemSwot.length){
+    atencao.push(`${plural(compSemSwot.length,'companhia com ações em curso não possui','companhias com ações em curso não possuem')} análise SWOT associada (${escapar(listar(compSemSwot.slice(0,4).map(c => c.sigla)))}${compSemSwot.length > 4 ? ' entre outras' : ''}), o que reduz a fundamentação estratégica do plano.`);
+  }
+  const semComercial = companhias.filter(c => base.some(a => a.companhiaId === c.id) && !comercialDaCompanhia(c.id));
+  if(semComercial.length && comerciais.length){
+    atencao.push(`${plural(semComercial.length,'companhia com ações não está','companhias com ações não estão')} vinculadas a nenhuma carteira comercial (${escapar(listar(semComercial.slice(0,4).map(c => c.sigla)))}), prejudicando a atribuição de responsabilidade comercial.`);
+  }
+  if(!atencao.length){
+    atencao.push(variar(['Não foram identificados desvios relevantes de prazo, priorização ou registro neste ciclo.','A apuração não revelou pontos críticos que demandem escalonamento.','Nenhuma inconsistência material foi identificada no plano vigente.']));
+  }
+
+  /* ---- Destaques positivos ---- */
+  const destaques = [];
+  if(m.concluidas > 0){
+    destaques.push(`${plural(m.concluidas,'ação foi concluída','ações foram concluídas')}, o equivalente a ${m.taxaConclusao}% do escopo registrado.`);
+  }
+  melhoresResp.slice(0,3).forEach(r => {
+    destaques.push(`<strong>${escapar(r.nome)}</strong> apresenta ${r.taxa}% de conclusão em ${plural(r.total,'ação','ações')} sob sua responsabilidade.`);
+  });
+  compCompletas.slice(0,3).forEach(c => {
+    destaques.push(`Todas as ações da companhia <strong>${escapar(c.nome)}</strong> foram concluídas (${plural(c.total,'ação','ações')}).`);
+  });
+  const noPrazo = base.filter(a => a.status !== 'Concluída' && a.status !== 'Cancelada' && !estaAtrasada(a)).length;
+  if(noPrazo > 0){
+    destaques.push(`${plural(noPrazo,'ação em aberto permanece','ações em aberto permanecem')} dentro do prazo pactuado.`);
+  }
+  if(maiorVolume && maiorVolume.total >= 3){
+    destaques.push(`A carteira de <strong>${escapar(maiorVolume.nome)}</strong> concentra o maior volume de ações (${maiorVolume.total}), com ${maiorVolume.taxa}% de conclusão.`);
+  }
+  const comResultado = base.filter(a => a.status === 'Concluída' && a.resultadoObtido).length;
+  if(comResultado > 0){
+    destaques.push(`${plural(comResultado,'ação concluída possui','ações concluídas possuem')} resultado obtido documentado, garantindo rastreabilidade da entrega.`);
+  }
+  if(comercialDestaque && comercialDestaque.taxa >= 60){
+    destaques.push(`A carteira de <strong>${escapar(comercialDestaque.nome)}</strong> apresenta ${comercialDestaque.taxa}% de conclusão em ${plural(comercialDestaque.total,'ação','ações')} distribuídas por ${plural(comercialDestaque.companhias,'companhia','companhias')}.`);
+  }
+  swotFavoravel.slice(0,3).forEach(s => {
+    const fo = itensSwot(s.forcas), op = itensSwot(s.oportunidades);
+    destaques.push(`A análise SWOT de <strong>${escapar(nomeCompanhia(s.companhiaId))}</strong> aponta ${plural(fo.length,'força','forças')} e ${plural(op.length,'oportunidade','oportunidades')}${op.length ? `, com espaço para ${escapar(op[0].toLowerCase())}` : ''}.`);
+  });
+  if(totalOportunidades > 0){
+    destaques.push(`O conjunto das análises mapeia ${plural(totalOportunidades,'oportunidade','oportunidades')} de ganho ainda não convertidas em ação, formando um pipeline de melhorias para o próximo ciclo.`);
+  }
+  if(!destaques.length){
+    destaques.push(variar(['O plano está em fase inicial: ainda não há entregas concluídas a destacar.','Não há conclusões registradas neste ciclo para compor destaques.','As ações registradas seguem em execução, sem entregas finalizadas até o momento.']));
+  }
+
+  /* ---- Recomendações ---- */
+  const recomendacoes = [];
+  if(m.atrasadas > 0){
+    recomendacoes.push(`${variar(['Repactuar prazos','Estabelecer novo cronograma','Revisar os prazos'])} das ${plural(m.atrasadas,'ação com prazo vencido','ações com prazo vencido')}, com definição de nova data e responsável formalmente confirmado.`);
+  }
+  if(altaPendente.length){
+    recomendacoes.push(`Priorizar a execução das ${plural(altaPendente.length,'ação classificada','ações classificadas')} como prioridade alta na próxima reunião de acompanhamento.`);
+  }
+  if(semResultadoEsperado.length){
+    recomendacoes.push('Completar o campo de resultado esperado nas ações em aberto, definindo métrica e valor-alvo para permitir aferição objetiva.');
+  }
+  if(concluidasSemRegistro.length){
+    recomendacoes.push('Registrar o resultado obtido nas ações já concluídas, consolidando o histórico de efetividade do plano.');
+  }
+  if(proximas.length){
+    recomendacoes.push(`Monitorar em regime semanal as ${plural(proximas.length,'ação com vencimento','ações com vencimento')} nos próximos sete dias.`);
+  }
+  if(respAtrasados.length && respAtrasados[0].atrasadas >= 2){
+    recomendacoes.push(`Avaliar redistribuição de demandas atribuídas a ${escapar(respAtrasados[0].nome)}, equilibrando a carga entre os responsáveis.`);
+  }
+  if(m.naoIniciadas > 0){
+    recomendacoes.push(`Definir data de início para as ${plural(m.naoIniciadas,'ação ainda não iniciada','ações ainda não iniciadas')}, evitando acúmulo de pendências no próximo ciclo.`);
+  }
+  const compSemAcao = companhias.filter(c => !base.some(a => a.companhiaId === c.id));
+  if(compSemAcao.length){
+    recomendacoes.push(`Avaliar a ausência de ações para ${listar(compSemAcao.slice(0,4).map(c => c.nome))}${compSemAcao.length > 4 ? ' e outras companhias' : ''}, confirmando se não há oportunidades de melhoria não mapeadas.`);
+  }
+  if(compSemSwot.length){
+    recomendacoes.push(`Elaborar análise SWOT para ${listar(compSemSwot.slice(0,3).map(c => c.nome))}${compSemSwot.length > 3 ? ' e demais companhias sem diagnóstico' : ''}, sustentando as próximas ações em leitura estratégica.`);
+  }
+  if(totalOportunidades > 0){
+    recomendacoes.push(`Converter em plano de ação as ${plural(totalOportunidades,'oportunidade identificada','oportunidades identificadas')} nas análises SWOT, atribuindo responsável e prazo a cada uma.`);
+  }
+  if(totalAmeacas > 0){
+    recomendacoes.push(`Definir medidas de mitigação para as ${plural(totalAmeacas,'ameaça mapeada','ameaças mapeadas')}, priorizando as companhias com maior volume de apontamentos de risco.`);
+  }
+  if(comercialCritico && comercialCritico.atrasadas >= 2){
+    recomendacoes.push(`Promover alinhamento entre a gestão e ${escapar(comercialCritico.nome)} para tratativa das pendências da carteira sob sua responsabilidade.`);
+  }
+  if(comerciais.length && semComercial.length){
+    recomendacoes.push('Completar a atribuição das companhias às carteiras comerciais em Configurações, garantindo interlocutor definido para cada seguradora.');
+  }
+  recomendacoes.push(variar([
+    'Manter a rotina de revisão do plano com periodicidade definida, atualizando status e resultados a cada ciclo.',
+    'Consolidar este boletim como pauta fixa da reunião gerencial, assegurando tratativa formal dos desvios.',
+    'Formalizar a atualização dos registros antes de cada apuração, preservando a confiabilidade dos indicadores.'
+  ]));
+
+  /* ---- Leitura estratégica (SWOT) ---- */
+  const estrategico = [];
+  const itensEstrategicos = [];
+  if(baseSwots.length){
+    estrategico.push(
+      `${variar(['A consolidação das análises SWOT indica','O cruzamento dos diagnósticos aponta','A leitura consolidada dos quadrantes revela'])} ` +
+      `<strong>${totalForcas}</strong> ${totalForcas===1?'força':'forças'} e <strong>${totalOportunidades}</strong> ${totalOportunidades===1?'oportunidade':'oportunidades'} frente a ` +
+      `<strong>${totalFraquezas}</strong> ${totalFraquezas===1?'fraqueza':'fraquezas'} e <strong>${totalAmeacas}</strong> ${totalAmeacas===1?'ameaça':'ameaças'}. ` +
+      (totalForcas + totalOportunidades >= totalFraquezas + totalAmeacas
+        ? variar(['O balanço é favorável, o que sustenta uma postura de aproveitamento das oportunidades mapeadas.','O saldo positivo permite priorizar iniciativas de crescimento sobre medidas defensivas.','O cenário predominante é de potencial a ser explorado, e não de contenção.'])
+        : variar(['O balanço aponta predominância de riscos, recomendando postura defensiva no curto prazo.','O saldo desfavorável sugere concentrar esforços em mitigação antes de novas frentes.','O cenário exige tratamento das fragilidades antes da expansão de escopo.']))
+    );
+
+    baseSwotOrdenado.slice(0,4).forEach(s => {
+      const fo = itensSwot(s.forcas).length, fr = itensSwot(s.fraquezas).length;
+      const op = itensSwot(s.oportunidades).length, am = itensSwot(s.ameacas).length;
+      const acoesComp = base.filter(a => a.companhiaId === s.companhiaId);
+      const perfil = (fo + op) > (fr + am) ? 'perfil favorável' : ((fr + am) > (fo + op) ? 'perfil de atenção' : 'perfil equilibrado');
+      itensEstrategicos.push(
+        `<strong>${escapar(nomeCompanhia(s.companhiaId))}</strong> (${formatarData(s.data)}, ${escapar(s.responsavel)}) — ${perfil}: ` +
+        `${fo}F / ${fr}Fr / ${op}O / ${am}A` +
+        (acoesComp.length ? `, com ${plural(acoesComp.length,'ação','ações')} no plano` : ', sem ações vinculadas no plano') + '.'
+      );
+    });
+
+    if(baseSwots.length > 4){
+      itensEstrategicos.push(`Outras ${baseSwots.length - 4} análises compõem o histórico e estão disponíveis na aba Análise SWOT.`);
+    }
+  }else{
+    estrategico.push(variar([
+      'Não há análises SWOT registradas para compor a leitura estratégica deste ciclo.',
+      'A leitura estratégica fica pendente até que sejam registradas análises SWOT das companhias.',
+      'Sem diagnósticos SWOT cadastrados, esta seção não apresenta conteúdo neste boletim.'
+    ]));
+  }
+
+  return {
+    geradoEm: agora,
+    escopo,
+    titulo: escopo ? `Boletim individual — ${escopo}` : 'Boletim gerencial de planos de ação',
+    subtitulo: escopo
+      ? `Recorte do responsável ${escopo} · ${plural(base.length,'ação','ações')} e ${plural(baseSwots.length,'análise SWOT','análises SWOT')}`
+      : 'Visão consolidada de todas as companhias e responsáveis',
+    resumo:[
+      {valor:m.total,          rotulo:'Ações'},
+      {valor:m.andamento,      rotulo:'Em andamento'},
+      {valor:m.concluidas,     rotulo:'Concluídas'},
+      {valor:m.atrasadas,      rotulo:'Atrasadas'},
+      {valor:baseSwots.length,     rotulo:'Análises SWOT'},
+      {valor:m.taxaConclusao + '%', rotulo:'Conclusão'}
+    ],
+    secoes:[
+      {titulo:'Panorama geral',            paragrafos:panorama},
+      {titulo:'Situação das ações',        paragrafos:[situacaoTexto], itens:situacaoItens},
+      {titulo:'Leitura estratégica (SWOT)',paragrafos:estrategico, itens:itensEstrategicos},
+      {titulo:'Principais pontos de atenção', itens:atencao},
+      {titulo:'Destaques positivos',       itens:destaques},
+      {titulo:'Recomendações',             itens:recomendacoes}
+    ]
+  };
+}
+
+/** Preenche o seletor de escopo do boletim com os responsáveis existentes. */
+function preencherEscopoBoletim(){
+  const sel = $('#boletimEscopo');
+  const atual = sel.value;
+  const resps = [...new Set([...responsaveis(), ...responsaveisSwot()])].sort((a,b)=>a.localeCompare(b,'pt-BR'));
+  sel.innerHTML = '<option value="">Gerencial (todos)</option>' +
+    resps.map(r => `<option value="${escapar(r)}">${escapar(r)}</option>`).join('');
+  sel.value = resps.includes(atual) ? atual : '';
+}
+
+function gerarBoletim(){
+  const area   = $('#areaBoletim');
+  const escopo = $('#boletimEscopo').value;
+
+  if(!acoes.length && !swots.length){
+    area.innerHTML = `
+      <div class="vazio">
+        <div class="vazio-icone"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4h11l3 3v13a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1z"/><path d="M8 11h8M8 15h5"/></svg></div>
+        <h3>Sem dados para analisar</h3>
+        <p>O boletim é montado a partir das ações cadastradas. Registre ações no Plano 5W2H para gerar o relatório.</p>
+        <button class="btn btn-primario" onclick="document.querySelector('[data-pagina=plano]').click()">Ir para o Plano 5W2H</button>
+      </div>`;
+    $('#btnBoletimPdf').style.display = 'none';
+    boletimAtual = null;
+    return;
+  }
+
+  // Recorte sem conteúdo: avisa em vez de gerar um relatório vazio
+  if(escopo && !acoes.some(a => a.who === escopo) && !swots.some(s => s.responsavel === escopo)){
+    area.innerHTML = `
+      <div class="vazio">
+        <div class="vazio-icone"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M16.5 16.5L21 21"/></svg></div>
+        <h3>Nada a reportar para ${escapar(escopo)}</h3>
+        <p>Não há ações nem análises SWOT sob a responsabilidade dessa pessoa. Escolha outro escopo ou gere o boletim gerencial.</p>
+      </div>`;
+    $('#btnBoletimPdf').style.display = 'none';
+    boletimAtual = null;
+    return;
+  }
+
+  const b = montarBoletim(escopo);
+  boletimAtual = b;   // o PDF reaproveita exatamente este conteúdo
+
+  const dataTexto = b.geradoEm.toLocaleDateString('pt-BR',{day:'2-digit',month:'long',year:'numeric'});
+  const horaTexto = b.geradoEm.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+
+  const secoesHtml = b.secoes.map(s => `
+    <div class="boletim-secao">
+      <h3>${s.titulo}</h3>
+      ${(s.paragrafos||[]).map(p => `<p>${p}</p>`).join('')}
+      ${s.itens && s.itens.length ? `<ul>${s.itens.map(i => `<li>${i}</li>`).join('')}</ul>` : ''}
+    </div>`).join('');
+
+  area.innerHTML = `
+    <div class="boletim-topo">
+      <div class="selo-escopo">${b.escopo ? 'Escopo individual' : 'Escopo gerencial'}</div>
+      <h2>${escapar(b.titulo)}</h2>
+      <p>${escapar(b.subtitulo)}</p>
+      <p style="margin-top:6px">Emitido em ${dataTexto} às ${horaTexto}</p>
+    </div>
+    <div class="boletim-corpo">
+      <div class="boletim-resumo">
+        ${b.resumo.map(r => `<div><b>${r.valor}</b><span>${r.rotulo}</span></div>`).join('')}
+      </div>
+      ${secoesHtml}
+    </div>`;
+
+  $('#btnBoletimPdf').style.display = '';
+  toast(b.escopo ? `Boletim de ${b.escopo} gerado.` : 'Boletim gerencial gerado.');
+}
+
+/* =========================================================
+   9.1 REPORT POR E-MAIL (baseado na análise SWOT)
+   ========================================================= */
+/** Monta assunto e corpo do e-mail a partir de uma análise SWOT. */
+function montarEmail(swotId){
+  const s = swots.find(x => x.id === swotId);
+  if(!s) return null;
+
+  const companhia = nomeCompanhia(s.companhiaId);
+  const forcas    = itensSwot(s.forcas);
+  const fraquezas = itensSwot(s.fraquezas);
+  const oport     = itensSwot(s.oportunidades);
+  const ameacas   = itensSwot(s.ameacas);
+
+  const comercial = comercialDaCompanhia(s.companhiaId);
+  const acoesComp = acoes.filter(a => a.companhiaId === s.companhiaId);
+  const abertas   = acoesComp.filter(a => a.status !== 'Concluída' && a.status !== 'Cancelada');
+  const atrasadas = acoesComp.filter(estaAtrasada);
+  const altas     = abertas.filter(a => a.prioridade === 'Alta');
+  const concluidas= acoesComp.filter(a => a.status === 'Concluída').length;
+
+  const lista = itens => itens.length
+    ? itens.map(i => `• ${i}`).join('\n')
+    : '• Nenhum item registrado nesta análise.';
+
+  /* ---- Recomendação: 3 a 5 linhas geradas conforme os dados ---- */
+  const rec = [];
+
+  // 1) Direção geral, conforme o balanço dos quadrantes
+  const favor = forcas.length + oport.length;
+  const risco = fraquezas.length + ameacas.length;
+  if(favor > risco){
+    rec.push(variar([
+      `O cenário de ${companhia} é favorável e recomenda-se aproveitar a posição atual para avançar nas frentes de maior retorno.`,
+      `O diagnóstico mostra ${companhia} em posição competitiva, o que permite priorizar iniciativas de crescimento no curto prazo.`,
+      `As forças identificadas sustentam uma agenda propositiva com ${companhia} já no próximo ciclo.`
+    ]));
+  }else if(risco > favor){
+    rec.push(variar([
+      `O diagnóstico de ${companhia} concentra mais pontos de risco do que de vantagem, o que sugere priorizar a correção das fragilidades antes de ampliar escopo.`,
+      `O balanço da análise indica predominância de riscos em ${companhia}, recomendando postura defensiva e plano de mitigação estruturado.`,
+      `As fragilidades mapeadas em ${companhia} superam as vantagens e devem ser endereçadas com prioridade.`
+    ]));
+  }else{
+    rec.push(variar([
+      `${companhia} apresenta cenário equilibrado entre vantagens e riscos, exigindo acompanhamento próximo para definir a direção do próximo ciclo.`,
+      `O quadro de ${companhia} está equilibrado, e a evolução dependerá da capacidade de converter oportunidades antes que os riscos se materializem.`
+    ]));
+  }
+
+  // 2) Oportunidade prioritária
+  if(oport.length){
+    rec.push(variar([
+      `Sugerimos priorizar ${oport[0].toLowerCase()}, transformando o ponto em ação formal com responsável e prazo definidos.`,
+      `A oportunidade de maior potencial é ${oport[0].toLowerCase()}, que recomendamos converter em plano de ação nesta semana.`,
+      `Como próximo passo, indicamos tratar ${oport[0].toLowerCase()} como iniciativa prioritária do plano.`
+    ]));
+  }
+
+  // 3) Risco prioritário
+  const riscoPrincipal = ameacas[0] || fraquezas[0];
+  if(riscoPrincipal){
+    rec.push(variar([
+      `Em paralelo, o ponto que exige contenção imediata é ${riscoPrincipal.toLowerCase()}.`,
+      `O risco a ser mitigado com prioridade é ${riscoPrincipal.toLowerCase()}.`,
+      `Recomendamos medida específica de mitigação para ${riscoPrincipal.toLowerCase()}.`
+    ]));
+  }
+
+  // 4) Situação do plano de ação da companhia
+  if(atrasadas.length){
+    rec.push(`No plano de ação, ${plural(atrasadas.length,'iniciativa está','iniciativas estão')} com prazo vencido${altas.length ? ` e ${plural(altas.length,'item é','itens são')} de prioridade alta` : ''}, o que reforça a necessidade de repactuação de prazos.`);
+  }else if(abertas.length){
+    rec.push(`O plano de ação de ${companhia} mantém ${plural(abertas.length,'iniciativa em andamento','iniciativas em andamento')} dentro do prazo${concluidas ? `, além de ${plural(concluidas,'entrega já concluída','entregas já concluídas')}` : ''}.`);
+  }else if(concluidas){
+    rec.push(`Todas as ${plural(concluidas,'iniciativa registrada foi concluída','iniciativas registradas foram concluídas')}, o que abre espaço para uma nova rodada de melhorias.`);
+  }else{
+    rec.push(`Ainda não há ações registradas para ${companhia} no plano 5W2H; sugerimos formalizar os primeiros itens a partir desta análise.`);
+  }
+
+  // 5) Encaminhamento
+  rec.push(variar([
+    'Seguimos à disposição para detalhar qualquer um dos pontos e apoiar na priorização.',
+    'Podemos consolidar esses encaminhamentos em plano formal na próxima reunião de acompanhamento.',
+    'Colocamo-nos à disposição para aprofundar a análise e apoiar na definição das prioridades.'
+  ]));
+
+  const assunto = `Análise SWOT – ${companhia}`;
+
+  const corpo =
+`Olá, pessoal.
+
+Segue um resumo da análise SWOT da ${companhia}, realizada em ${formatarData(s.data)}${comercial ? ` (carteira de ${comercial.nome})` : ''}.
+
+PRINCIPAIS FORÇAS
+${lista(forcas.slice(0,3))}
+
+PRINCIPAIS OPORTUNIDADES
+${lista(oport.slice(0,3))}
+
+PONTOS DE ATENÇÃO
+${lista([...fraquezas.slice(0,3), ...ameacas.slice(0,3)])}
+
+RECOMENDAÇÃO
+${rec.join(' ')}
+
+Atenciosamente,
+${s.responsavel}`;
+
+  return {assunto, corpo};
+}
+
+function abrirModalEmail(){
+  if(!swots.length){
+    toast('Cadastre uma análise SWOT para gerar o report.','erro');
+    irPara('swot');
+    return;
+  }
+
+  const sel = $('#emailAnalise');
+  sel.innerHTML = swotsOrdenados()
+    .map(s => `<option value="${s.id}">${escapar(nomeCompanhia(s.companhiaId))} — ${formatarData(s.data)}</option>`).join('');
+
+  // Prioriza a análise aberta no formulário, se houver
+  sel.value = (editandoSwot && swots.some(s => s.id === editandoSwot)) ? editandoSwot : sel.options[0].value;
+
+  atualizarPreviaEmail();
+  abrirModal('modalEmail');
+}
+
+function atualizarPreviaEmail(){
+  const email = montarEmail($('#emailAnalise').value);
+  if(!email) return;
+  $('#emailAssunto').textContent = email.assunto;
+  $('#emailCorpo').textContent   = email.corpo;
+}
+
+function copiarEmail(){
+  const texto = `${$('#emailAssunto').textContent}\n\n${$('#emailCorpo').textContent}`;
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(texto)
+      .then(()=>toast('Texto copiado.'))
+      .catch(()=>toast('Não foi possível copiar. Selecione o texto manualmente.','erro'));
+  }else{
+    toast('Não foi possível copiar. Selecione o texto manualmente.','erro');
+  }
+}
+
+function abrirNoEmail(){
+  const assunto = encodeURIComponent($('#emailAssunto').textContent);
+  const corpo   = encodeURIComponent($('#emailCorpo').textContent);
+  window.location.href = `mailto:?subject=${assunto}&body=${corpo}`;
+}
+
+
+/* =========================================================
+   10. EXPORTAÇÕES
+   ========================================================= */
+function exportarExcel(){
+  const lista = acoesFiltradas();
+  if(!lista.length) return toast('Não há ações para exportar.','erro');
+
+  const linhas = lista.map(a => ({
+    'Data':                formatarData(a.data),
+    'Companhia':           nomeCompanhia(a.companhiaId),
+    'Sigla':               siglaCompanhia(a.companhiaId),
+    'Comercial':           (comercialDaCompanhia(a.companhiaId) || {}).nome || '',
+    'Área':                a.area || '',
+    'Indicador':           a.indicador || '',
+    'What (o quê)':        a.what || '',
+    'Why (por quê)':       a.why || '',
+    'Where (onde)':        a.where || '',
+    'When (prazo)':        formatarData(a.when),
+    'Who (responsável)':   a.who || '',
+    'How (como)':          a.how || '',
+    'How much (R$)':       Number(a.howMuch) || 0,
+    'Prioridade':          a.prioridade || '',
+    'Status':              estaAtrasada(a) ? `${a.status} (atrasada)` : a.status,
+    'Dias de atraso':      estaAtrasada(a) ? diasDeAtraso(a) : 0,
+    'Resultado esperado':  a.resultadoEsperado || '',
+    'Resultado obtido':    a.resultadoObtido || '',
+    'Observações':         a.observacoes || ''
+  }));
+
+  const ws = XLSX.utils.json_to_sheet(linhas);
+  ws['!cols'] = [
+    {wch:11},{wch:24},{wch:10},{wch:20},{wch:22},{wch:24},{wch:44},{wch:38},{wch:20},
+    {wch:12},{wch:20},{wch:38},{wch:14},{wch:12},{wch:20},{wch:14},{wch:34},{wch:34},{wch:30}
+  ];
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Plano 5W2H');
+  XLSX.writeFile(wb, `plano-acao-5w2h-${new Date().toISOString().slice(0,10)}.xlsx`);
+  toast('Planilha exportada.');
+}
+
+function exportarPdf(){
+  const lista = acoesFiltradas();
+  if(!lista.length) return toast('Não há ações para exportar.','erro');
+
+  const {jsPDF} = window.jspdf;
+  const doc = new jsPDF({orientation:'landscape', unit:'mm', format:'a4'});
+  const larg = doc.internal.pageSize.getWidth();
+
+  doc.setFillColor(5,10,52);
+  doc.rect(0,0,larg,26,'F');
+  doc.setTextColor(255,255,255);
+  doc.setFont('helvetica','bold'); doc.setFontSize(14);
+  doc.text('Plano de Ação 5W2H', 14, 12);
+  doc.setFont('helvetica','normal'); doc.setFontSize(9);
+  doc.setTextColor(115,198,255);
+  doc.text(`Emitido em ${new Date().toLocaleString('pt-BR')} · ${plural(lista.length,'ação','ações')}`, 14, 19);
+
+  doc.autoTable({
+    startY:32,
+    head:[['Data','Cia','Área','Indicador','What','Why','When','Who','How much','Prior.','Status']],
+    body:lista.map(a => [
+      formatarData(a.data),
+      siglaCompanhia(a.companhiaId),
+      a.area || '-',
+      a.indicador || '-',
+      a.what || '-',
+      a.why || '-',
+      formatarData(a.when),
+      a.who || '-',
+      Number(a.howMuch) ? formatarMoeda(a.howMuch) : '-',
+      a.prioridade || '-',
+      estaAtrasada(a) ? 'Atrasada' : a.status
+    ]),
+    styles:{font:'helvetica', fontSize:7.4, cellPadding:2.4, valign:'middle', lineColor:[229,233,240], lineWidth:.1, textColor:[40,46,66]},
+    headStyles:{fillColor:[10,100,255], textColor:255, fontSize:7.6, fontStyle:'bold'},
+    alternateRowStyles:{fillColor:[248,250,252]},
+    columnStyles:{
+      0:{cellWidth:17}, 1:{cellWidth:15}, 2:{cellWidth:24}, 3:{cellWidth:26},
+      4:{cellWidth:48}, 5:{cellWidth:40}, 6:{cellWidth:17}, 7:{cellWidth:24},
+      8:{cellWidth:20}, 9:{cellWidth:15}, 10:{cellWidth:20}
+    },
+    margin:{left:10, right:10},
+    didDrawPage: dados => {
+      doc.setFontSize(7.5); doc.setTextColor(140,148,163);
+      doc.text(`Página ${doc.internal.getNumberOfPages()}`, larg - 24, doc.internal.pageSize.getHeight() - 8);
+    }
+  });
+
+  doc.save(`plano-acao-5w2h-${new Date().toISOString().slice(0,10)}.pdf`);
+  toast('PDF exportado.');
+}
+
+function exportarBoletimPdf(){
+  if(!boletimAtual) return toast('Gere o boletim antes de exportar.','erro');
+
+  const b = boletimAtual;
+  const {jsPDF} = window.jspdf;
+  const doc  = new jsPDF({orientation:'portrait', unit:'mm', format:'a4'});
+  const larg = doc.internal.pageSize.getWidth();
+  const alt  = doc.internal.pageSize.getHeight();
+  const marg = 18;
+  const util = larg - marg*2;
+  let y = 0;
+
+  const limpar = t => String(t).replace(/<[^>]+>/g,'')
+    .replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>')
+    .replace(/&quot;/g,'"').replace(/&#39;/g,"'");
+
+  const novaPaginaSePreciso = precisa => {
+    if(y + precisa > alt - 18){ doc.addPage(); y = 22; }
+  };
+
+  // Cabeçalho
+  doc.setFillColor(5,10,52);
+  doc.rect(0,0,larg,46,'F');
+  doc.setTextColor(115,198,255); doc.setFont('helvetica','normal'); doc.setFontSize(8);
+  doc.text(b.escopo ? 'RELATÓRIO EXECUTIVO · ESCOPO INDIVIDUAL' : 'RELATÓRIO EXECUTIVO · ESCOPO GERENCIAL', marg, 14);
+  doc.setTextColor(255,255,255); doc.setFont('helvetica','bold'); doc.setFontSize(16);
+  doc.text(doc.splitTextToSize(b.titulo, util), marg, 24);
+  doc.setFont('helvetica','normal'); doc.setFontSize(8.5); doc.setTextColor(190,205,235);
+  doc.text(doc.splitTextToSize(b.subtitulo, util), marg, 32);
+  doc.text(`Emitido em ${b.geradoEm.toLocaleString('pt-BR')}`, marg, 40);
+  y = 58;
+
+  // Resumo numérico
+  const lc = util / b.resumo.length;
+  b.resumo.forEach((r,i) => {
+    const x = marg + i*lc;
+    doc.setFillColor(244,246,249);
+    doc.rect(x, y-8, lc-2, 18, 'F');
+    doc.setTextColor(5,10,52); doc.setFont('helvetica','bold'); doc.setFontSize(13);
+    doc.text(String(r.valor), x+4, y);
+    doc.setFont('helvetica','normal'); doc.setFontSize(7); doc.setTextColor(107,114,128);
+    doc.text(r.rotulo.toUpperCase(), x+4, y+6);
+  });
+  y += 24;
+
+  // Seções
+  b.secoes.forEach(s => {
+    novaPaginaSePreciso(26);
+    doc.setFont('helvetica','bold'); doc.setFontSize(11); doc.setTextColor(10,100,255);
+    doc.text(s.titulo.toUpperCase(), marg, y);
+    doc.setDrawColor(229,233,240); doc.setLineWidth(.4);
+    doc.line(marg, y+2.5, larg-marg, y+2.5);
+    y += 10;
+
+    (s.paragrafos||[]).forEach(p => {
+      doc.setFont('helvetica','normal'); doc.setFontSize(9.5); doc.setTextColor(44,51,70);
+      const linhas = doc.splitTextToSize(limpar(p), util);
+      linhas.forEach(l => { novaPaginaSePreciso(6); doc.text(l, marg, y); y += 5.2; });
+      y += 3;
+    });
+
+    (s.itens||[]).forEach(item => {
+      doc.setFont('helvetica','normal'); doc.setFontSize(9.5); doc.setTextColor(44,51,70);
+      const linhas = doc.splitTextToSize(limpar(item), util - 6);
+      linhas.forEach((l,i) => {
+        novaPaginaSePreciso(6);
+        if(i === 0){
+          doc.setFillColor(115,198,255);
+          doc.rect(marg, y-2.2, 2, 2, 'F');
+        }
+        doc.text(l, marg + 6, y);
+        y += 5.2;
+      });
+      y += 2;
+    });
+
+    y += 6;
+  });
+
+  // Rodapé
+  const total = doc.internal.getNumberOfPages();
+  for(let p = 1; p <= total; p++){
+    doc.setPage(p);
+    doc.setFont('helvetica','normal'); doc.setFontSize(7.5); doc.setTextColor(150,158,172);
+    doc.text('Boletim gerado automaticamente a partir das ações cadastradas.', marg, alt-10);
+    doc.text(`${p}/${total}`, larg-marg-8, alt-10);
+  }
+
+  const sufixo = b.escopo
+    ? b.escopo.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'')
+    : 'gerencial';
+  doc.save(`boletim-${sufixo}-${new Date().toISOString().slice(0,10)}.pdf`);
+  toast('Boletim exportado em PDF.');
+}
+
+/* =========================================================
+   10.1 BACKUP (EXPORTAR / IMPORTAR JSON)
+   ========================================================= */
+const VERSAO_BACKUP = 1;
+
+/** Contadores exibidos no topo da aba de backup. */
+function renderizarResumoBackup(){
+  const itens = [
+    {valor:companhias.length, rotulo:'Companhias'},
+    {valor:comerciais.length, rotulo:'Comerciais'},
+    {valor:acoes.length,      rotulo:'Ações'},
+    {valor:swots.length,      rotulo:'Análises SWOT'}
+  ];
+  $('#resumoBackup').innerHTML = itens
+    .map(i => `<div><b>${i.valor}</b><span>${i.rotulo}</span></div>`).join('');
+}
+
+function exportarJson(){
+  const pacote = {
+    sistema: 'Planejamento Comercial',
+    versao: VERSAO_BACKUP,
+    exportadoEm: new Date().toISOString(),
+    dados: {companhias, comerciais, acoes, swots}
+  };
+
+  const blob = new Blob([JSON.stringify(pacote, null, 2)], {type:'application/json'});
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href = url;
+  a.download = `backup-planejamento-comercial-${new Date().toISOString().slice(0,10)}.json`;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+  toast('Backup exportado.');
+}
+
+/** Valida o pacote e devolve os dados normalizados, ou null se o arquivo não servir. */
+function validarBackup(pacote){
+  if(!pacote || typeof pacote !== 'object') return null;
+  const d = pacote.dados || pacote;   // aceita também o formato só com os dados
+  const listas = ['companhias','comerciais','acoes','swots'];
+  if(!listas.some(k => Array.isArray(d[k]))) return null;
+  return {
+    companhias: Array.isArray(d.companhias) ? d.companhias : [],
+    comerciais: Array.isArray(d.comerciais) ? d.comerciais : [],
+    acoes:      Array.isArray(d.acoes)      ? d.acoes      : [],
+    swots:      Array.isArray(d.swots)      ? d.swots      : []
+  };
+}
+
+function importarJson(arquivo){
+  if(!arquivo) return;
+
+  const leitor = new FileReader();
+
+  leitor.onerror = () => toast('Não foi possível ler o arquivo.','erro');
+  leitor.onload = () => {
+    let dados;
+    try{
+      dados = validarBackup(JSON.parse(leitor.result));
+    }catch(e){
+      return toast('Arquivo inválido: não é um JSON legível.','erro');
+    }
+
+    if(!dados) return toast('Arquivo JSON sem os dados esperados deste sistema.','erro');
+
+    const resumo = `${plural(dados.companhias.length,'companhia','companhias')}, ` +
+                   `${plural(dados.comerciais.length,'comercial','comerciais')}, ` +
+                   `${plural(dados.acoes.length,'ação','ações')} e ` +
+                   `${plural(dados.swots.length,'análise SWOT','análises SWOT')}`;
+
+    $('#btnConfirmarExclusao').style.display = '';
+    confirmar('Importar backup',
+      `O arquivo contém ${resumo}. Os dados atuais deste navegador serão substituídos. Exporte um backup antes se quiser preservá-los.`,
+      'Importar',
+      () => {
+        companhias = dados.companhias;
+        comerciais = dados.comerciais;
+        acoes      = dados.acoes;
+        swots      = dados.swots;
+
+        salvarCompanhias(); salvarComerciais(); salvarAcoes(); salvarSwots();
+
+        // Redesenha o sistema inteiro com os dados importados
+        ['#filtroComercial','#filtroCompanhia','#filtroResponsavel','#filtroStatus','#filtroPrioridade',
+         '#filtroSwotCompanhia','#filtroSwotResponsavel','#boletimEscopo'].forEach(sel => { if($(sel)) $(sel).value = ''; });
+        boletimAtual = null;
+        $('#areaBoletim').innerHTML = '';
+        $('#btnBoletimPdf').style.display = 'none';
+
+        preencherSelects();
+        preencherEscopoBoletim();
+        limparFormularioSwot();
+        renderizarSwots();
+        renderizarComerciais();
+        renderizarCompanhias();
+        renderizarAcoes();
+        renderizarResumoBackup();
+        renderizarDashboard();
+        toast('Backup importado.');
+      });
+  };
+
+  leitor.readAsText(arquivo);
+}
+
+
+/* =========================================================
+   11. EVENTOS
+   ========================================================= */
+function registrarEventos(){
+  // Navegação
+  $$('.nav-item').forEach(b => b.addEventListener('click', () => irPara(b.dataset.pagina)));
+  $('#btnMenu').addEventListener('click', alternarSidebar);
+  $('#overlay').addEventListener('click', fecharSidebar);
+
+  // Menu superior (três pontos)
+  $('#btnMenuSuperior').addEventListener('click', e => { e.stopPropagation(); alternarMenuSuperior(); });
+  $$('#menuFlutuante [data-menu]').forEach(b => b.addEventListener('click', () => {
+    const opcao = b.dataset.menu;
+    fecharMenuSuperior();
+    if(opcao === 'configuracoes'){
+      irPara('configuracoes');
+      irParaModulo('comerciais');
+    }else if(opcao === 'boletim'){
+      irPara('boletim');
+      gerarBoletim();
+    }else if(opcao === 'email'){
+      abrirModalEmail();
+    }
+  }));
+  document.addEventListener('click', e => {
+    if(!e.target.closest('.menu-superior')) fecharMenuSuperior();
+  });
+
+  // Abas de Configurações
+  $$('.aba').forEach(a => a.addEventListener('click', () => {
+    irParaModulo(a.dataset.modulo);
+    if(a.dataset.modulo === 'backup') renderizarResumoBackup();
+  }));
+
+  // Modais
+  $$('[data-fechar]').forEach(b => b.addEventListener('click', () => fecharModal(b.dataset.fechar)));
+  $$('.modal').forEach(m => m.addEventListener('click', e => { if(e.target === m) fecharModal(m.id); }));
+  document.addEventListener('keydown', e => {
+    if(e.key === 'Escape'){
+      const aberto = $$('.modal.aberto').pop();
+      if(aberto) fecharModal(aberto.id);
+      else { fecharMenuSuperior(); fecharSidebar(); }
+    }
+  });
+
+  // Comerciais
+  $('#btnNovoComercial').addEventListener('click', () => abrirModalComercial());
+  $('#btnSalvarComercial').addEventListener('click', salvarComercial);
+  $('#areaTabelaComerciais').addEventListener('click', e => {
+    const editar  = e.target.closest('[data-editar-comercial]');
+    const excluir = e.target.closest('[data-excluir-comercial]');
+    if(editar)  abrirModalComercial(editar.dataset.editarComercial);
+    if(excluir) excluirComercial(excluir.dataset.excluirComercial);
+  });
+
+  // Companhias
+  $('#btnNovaCompanhia').addEventListener('click', () => abrirModalCompanhia());
+  $('#btnSalvarCompanhia').addEventListener('click', salvarCompanhia);
+  $('#areaTabelaCompanhias').addEventListener('click', e => {
+    const editar  = e.target.closest('[data-editar-comp]');
+    const excluir = e.target.closest('[data-excluir-comp]');
+    if(editar)  abrirModalCompanhia(editar.dataset.editarComp);
+    if(excluir) excluirCompanhia(excluir.dataset.excluirComp);
+  });
+
+  // Ações
+  $('#btnNovaAcao').addEventListener('click', () => abrirModalAcao());
+  $('#btnSalvarAcao').addEventListener('click', salvarAcao);
+  $('#areaTabelaAcoes').addEventListener('click', e => {
+    const editar    = e.target.closest('[data-editar]');
+    const excluir   = e.target.closest('[data-excluir]');
+    const finalizar = e.target.closest('[data-finalizar]');
+    if(editar)    abrirModalAcao(editar.dataset.editar);
+    if(excluir)   excluirAcao(excluir.dataset.excluir);
+    if(finalizar) abrirModalFinalizar(finalizar.dataset.finalizar);
+  });
+  $('#btnConfirmarFinalizar').addEventListener('click', confirmarFinalizar);
+
+  // Análise SWOT
+  $('#btnSwotSalvar').addEventListener('click', salvarSwot);
+  $('#btnSwotExcluir').addEventListener('click', excluirSwot);
+  $('#btnSwotNova').addEventListener('click', limparFormularioSwot);
+  ['#filtroSwotCompanhia','#filtroSwotResponsavel']
+    .forEach(sel => $(sel).addEventListener('change', renderizarSwots));
+  $('#areaHistoricoSwot').addEventListener('click', e => {
+    const item = e.target.closest('[data-swot]');
+    if(item) abrirSwot(item.dataset.swot);
+  });
+
+  // Report por e-mail
+  $('#emailAnalise').addEventListener('change', atualizarPreviaEmail);
+  $('#btnCopiarEmail').addEventListener('click', copiarEmail);
+  $('#btnAbrirEmail').addEventListener('click', abrirNoEmail);
+
+  // Filtros (o filtro de comercial reconstrói a lista de companhias)
+  $('#filtroComercial').addEventListener('change', () => { aplicarFiltrosInteligentes(); renderizarAcoes(); });
+  $('#filtroCompanhia').addEventListener('change', () => { atualizarDicaFiltro(); renderizarAcoes(); });
+  ['#filtroResponsavel','#filtroStatus','#filtroPrioridade']
+    .forEach(sel => $(sel).addEventListener('change', renderizarAcoes));
+  $('#btnLimparFiltros').addEventListener('click', () => {
+    ['#filtroComercial','#filtroCompanhia','#filtroResponsavel','#filtroStatus','#filtroPrioridade']
+      .forEach(s => $(s).value = '');
+    aplicarFiltrosInteligentes();
+    renderizarAcoes();
+  });
+
+  // Confirmação
+  $('#btnConfirmarExclusao').addEventListener('click', () => {
+    if(typeof acaoConfirmada === 'function') acaoConfirmada();
+    acaoConfirmada = null;
+    fecharModal('modalConfirmar');
+  });
+
+  // Backup
+  $('#btnExportarJson').addEventListener('click', exportarJson);
+  $('#btnImportarJson').addEventListener('click', () => $('#arquivoJson').click());
+  $('#arquivoJson').addEventListener('change', e => {
+    importarJson(e.target.files[0]);
+    e.target.value = '';   // permite reimportar o mesmo arquivo
+  });
+
+  // Boletim e exportações
+  $('#btnGerarBoletim').addEventListener('click', gerarBoletim);
+  $('#btnBoletimPdf').addEventListener('click', exportarBoletimPdf);
+  $('#btnExcel').addEventListener('click', exportarExcel);
+  $('#btnPdf').addEventListener('click', exportarPdf);
+}
+
+/* =========================================================
+   12. INICIALIZAÇÃO
+   ========================================================= */
+/** Preenche a data da faixa de boas-vindas do dashboard. */
+function atualizarHero(){
+  const agora = new Date();
+  $('#heroData').textContent = agora.toLocaleDateString('pt-BR',{weekday:'long', day:'2-digit', month:'long'});
+  $('#heroHora').textContent = `Atualizado às ${agora.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})}`;
+
+  const m = calcularMetricas();
+  $('#heroResumo').textContent = m.total
+    ? `${plural(m.total,'ação em acompanhamento','ações em acompanhamento')} · ${plural(swots.length,'análise SWOT','análises SWOT')} registradas`
+    : 'Comece cadastrando as companhias e a primeira ação do plano.';
+}
+
+function iniciar(){
+  carregarDados();
+  restaurarSidebar();
+  registrarEventos();
+  preencherSelects();
+  preencherEscopoBoletim();
+  renderizarResumoBackup();
+  renderizarComerciais();
+  renderizarCompanhias();
+  renderizarAcoes();
+  limparFormularioSwot();
+  renderizarSwots();
+  renderizarDashboard();
+  irPara('dashboard');
+}
+
+document.addEventListener('DOMContentLoaded', iniciar);
+})();
+</script>
+</body>
+</html>
