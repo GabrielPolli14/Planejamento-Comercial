@@ -506,6 +506,16 @@ tbody tr:hover{background:#FAFBFD}
 .brand{cursor:pointer;border-radius:var(--raio-sm);transition:var(--transicao);width:100%;text-align:left}
 .brand:hover{opacity:.82}
 
+/* Prévia da importação */
+.import-bloco{border:1.5px solid var(--borda);border-radius:var(--raio-sm);padding:15px 17px;margin-bottom:14px}
+.import-bloco:last-child{margin-bottom:0}
+.import-bloco h4{font-size:10.5px;text-transform:uppercase;letter-spacing:.9px;color:var(--texto-suave);font-weight:600;margin-bottom:10px}
+.import-linha{display:flex;align-items:baseline;justify-content:space-between;gap:14px;font-size:12.8px;padding:4px 0}
+.import-linha span{color:var(--texto)}
+.import-linha b{font-weight:600;color:var(--azul-escuro);white-space:nowrap}
+.import-linha.somar b{color:var(--verde)}
+.import-linha.ignorar span,.import-linha.ignorar b{color:var(--texto-suave)}
+
 /* ---------- Marca d'água ---------- */
 .marca-dagua{
   position:fixed;bottom:12px;right:22px;z-index:30;pointer-events:none;
@@ -977,7 +987,7 @@ tbody tr:hover{background:#FAFBFD}
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V3"/><path d="M8 7l4-4 4 4"/><path d="M4 19h16"/></svg>
                   Importar dados
                 </h3>
-                <p>Carrega um backup gerado por este sistema. Os dados atuais deste navegador serão <b>substituídos</b> pelo conteúdo do arquivo.</p>
+                <p>Carrega um backup gerado por este sistema. Você escolhe entre <b>somar</b> ao cadastro atual (sem duplicar) ou <b>substituir</b> tudo.</p>
                 <button class="btn btn-claro btn-sm" id="btnImportarJson">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V3"/><path d="M8 7l4-4 4 4"/><path d="M4 19h16"/></svg>
                   Selecionar arquivo JSON
@@ -1264,6 +1274,27 @@ tbody tr:hover{background:#FAFBFD}
   </div>
 </div>
 
+<!-- ====================== MODAL IMPORTAR BACKUP ====================== -->
+<div class="modal" id="modalImportar">
+  <div class="modal-caixa estreita">
+    <div class="modal-cabecalho">
+      <div>
+        <h2>Importar backup</h2>
+        <p>Escolha como aplicar o arquivo aos dados atuais</p>
+      </div>
+      <button class="modal-fechar" data-fechar="modalImportar" aria-label="Fechar">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <div class="modal-corpo" id="previaImportacao"></div>
+    <div class="modal-rodape">
+      <button class="btn btn-claro" data-fechar="modalImportar">Cancelar</button>
+      <button class="btn btn-perigo" id="btnSubstituirBackup">Substituir tudo</button>
+      <button class="btn btn-primario" id="btnSomarBackup">Somar aos dados atuais</button>
+    </div>
+  </div>
+</div>
+
 <!-- Marca d'água — troque o nome abaixo se necessário -->
 <div class="marca-dagua">Criado por: <b>Gabriel Aguiar</b></div>
 
@@ -1313,7 +1344,8 @@ let editandoComercial = null;
 let editandoSwot = null;
 let finalizandoId = null;
 let acaoConfirmada = null;
-let boletimAtual = null;   // último boletim gerado (reutilizado na exportação em PDF)
+let boletimAtual = null;         // último boletim gerado (reutilizado na exportação em PDF)
+let importacaoPendente = null;   // arquivo lido e prévia da mesclagem, aguardando decisão
 
 /* =========================================================
    2. UTILITÁRIOS
@@ -3328,6 +3360,124 @@ function validarBackup(pacote){
   };
 }
 
+/* ---- Mesclagem: chaves lógicas para reconhecer registros equivalentes ----
+   Backups vindos de outra máquina têm IDs diferentes para o mesmo cadastro,
+   então a identificação é feita pelo conteúdo, não pelo ID.                */
+const chaveCompanhia = c => String(c.sigla || '').trim().toUpperCase();
+const chaveComercial = c => String(c.nome  || '').trim().toLowerCase();
+const chaveAcao = a => [a.companhiaId, String(a.what||'').trim().toLowerCase(), a.when||'', String(a.who||'').trim().toLowerCase()].join('|');
+const chaveSwot = s => [s.companhiaId, s.data||'', String(s.responsavel||'').trim().toLowerCase()].join('|');
+
+/**
+ * Calcula o resultado de somar um backup aos dados atuais, sem alterar nada.
+ * Companhias são casadas por sigla e os IDs do arquivo são reapontados para os
+ * locais, de modo que ações, análises e carteiras não fiquem órfãs.
+ */
+function calcularMesclagem(dados){
+  const clone = o => JSON.parse(JSON.stringify(o));
+  const comps = clone(companhias), coms = clone(comerciais);
+  const acs   = clone(acoes),      sws  = clone(swots);
+
+  const r = {compNovas:0, compExistentes:0, comNovos:0, comAmpliados:0, comIguais:0,
+             acoesNovas:0, acoesRepetidas:0, swotNovas:0, swotRepetidas:0};
+
+  const usados = new Set([...comps, ...coms, ...acs, ...sws].map(x => x.id));
+  const idLivre = original => {
+    let id = original && !usados.has(original) ? original : gerarId();
+    while(usados.has(id)) id = gerarId();
+    usados.add(id);
+    return id;
+  };
+
+  // 1. Companhias — casadas por sigla
+  const mapa = {};
+  const porSigla = new Map(comps.map(c => [chaveCompanhia(c), c]));
+  (dados.companhias || []).forEach(c => {
+    const k = chaveCompanhia(c);
+    if(!k) return;
+    const local = porSigla.get(k);
+    if(local){
+      mapa[c.id] = local.id;
+      if(!local.observacoes && c.observacoes) local.observacoes = c.observacoes;
+      r.compExistentes++;
+    }else{
+      const nova = {id:idLivre(c.id), nome:c.nome || '(sem nome)', sigla:k, observacoes:c.observacoes || ''};
+      comps.push(nova); porSigla.set(k, nova); mapa[c.id] = nova.id;
+      r.compNovas++;
+    }
+  });
+  const trad = id => mapa[id] || id;
+
+  // 2. Comerciais — casados por nome, com união das carteiras
+  const porNome = new Map(coms.map(c => [chaveComercial(c), c]));
+  (dados.comerciais || []).forEach(c => {
+    const k = chaveComercial(c);
+    if(!k) return;
+    const carteira = (c.companhias || []).map(trad);
+    const local = porNome.get(k);
+    if(local){
+      const antes = (local.companhias || []).length;
+      local.companhias = [...new Set([...(local.companhias || []), ...carteira])];
+      local.companhias.length > antes ? r.comAmpliados++ : r.comIguais++;
+    }else{
+      const novo = {id:idLivre(c.id), nome:c.nome, companhias:carteira};
+      coms.push(novo); porNome.set(k, novo);
+      r.comNovos++;
+    }
+  });
+
+  // 3. Ações — ignora repetidas (mesmo ID ou mesma companhia + what + prazo + responsável)
+  const idsAcoes = new Set(acs.map(a => a.id));
+  const vistasAcoes = new Set(acs.map(chaveAcao));
+  (dados.acoes || []).forEach(a => {
+    const rec = {...a, companhiaId: trad(a.companhiaId)};
+    if(idsAcoes.has(a.id) || vistasAcoes.has(chaveAcao(rec))){ r.acoesRepetidas++; return; }
+    rec.id = idLivre(a.id);
+    acs.push(rec); idsAcoes.add(rec.id); vistasAcoes.add(chaveAcao(rec));
+    r.acoesNovas++;
+  });
+
+  // 4. Análises SWOT — repetidas = mesma companhia, data e responsável
+  const idsSwot = new Set(sws.map(s => s.id));
+  const vistasSwot = new Set(sws.map(chaveSwot));
+  (dados.swots || []).forEach(s => {
+    const rec = {...s, companhiaId: trad(s.companhiaId)};
+    if(idsSwot.has(s.id) || vistasSwot.has(chaveSwot(rec))){ r.swotRepetidas++; return; }
+    rec.id = idLivre(s.id);
+    sws.push(rec); idsSwot.add(rec.id); vistasSwot.add(chaveSwot(rec));
+    r.swotNovas++;
+  });
+
+  return {companhias:comps, comerciais:coms, acoes:acs, swots:sws, resumo:r};
+}
+
+/** Grava um conjunto de dados e redesenha o sistema inteiro. */
+function aplicarDados(novos, mensagem){
+  companhias = novos.companhias;
+  comerciais = novos.comerciais;
+  acoes      = novos.acoes;
+  swots      = novos.swots;
+
+  salvarCompanhias(); salvarComerciais(); salvarAcoes(); salvarSwots();
+
+  ['#filtroComercial','#filtroCompanhia','#filtroResponsavel','#filtroStatus','#filtroPrioridade',
+   '#filtroSwotCompanhia','#filtroSwotResponsavel','#boletimEscopo'].forEach(sel => { if($(sel)) $(sel).value = ''; });
+  boletimAtual = null;
+  $('#areaBoletim').innerHTML = '';
+  $('#btnBoletimPdf').style.display = 'none';
+
+  preencherSelects();
+  preencherEscopoBoletim();
+  limparFormularioSwot();
+  renderizarSwots();
+  renderizarComerciais();
+  renderizarCompanhias();
+  renderizarAcoes();
+  renderizarResumoBackup();
+  renderizarDashboard();
+  toast(mensagem);
+}
+
 function importarJson(arquivo){
   if(!arquivo) return;
 
@@ -3344,44 +3494,64 @@ function importarJson(arquivo){
 
     if(!dados) return toast('Arquivo JSON sem os dados esperados deste sistema.','erro');
 
-    const resumo = `${plural(dados.companhias.length,'companhia','companhias')}, ` +
-                   `${plural(dados.comerciais.length,'comercial','comerciais')}, ` +
-                   `${plural(dados.acoes.length,'ação','ações')} e ` +
-                   `${plural(dados.swots.length,'análise SWOT','análises SWOT')}`;
+    importacaoPendente = {dados, mesclagem: calcularMesclagem(dados)};
+    const r = importacaoPendente.mesclagem.resumo;
 
-    $('#btnConfirmarExclusao').style.display = '';
-    confirmar('Importar backup',
-      `O arquivo contém ${resumo}. Os dados atuais deste navegador serão substituídos. Exporte um backup antes se quiser preservá-los.`,
-      'Importar',
-      () => {
-        companhias = dados.companhias;
-        comerciais = dados.comerciais;
-        acoes      = dados.acoes;
-        swots      = dados.swots;
+    const linha = (rotulo, valor, classe = '') =>
+      `<div class="import-linha ${classe}"><span>${rotulo}</span><b>${valor}</b></div>`;
 
-        salvarCompanhias(); salvarComerciais(); salvarAcoes(); salvarSwots();
+    $('#previaImportacao').innerHTML = `
+      <div class="import-bloco">
+        <h4>Conteúdo do arquivo</h4>
+        ${linha('Companhias',    dados.companhias.length)}
+        ${linha('Comerciais',    dados.comerciais.length)}
+        ${linha('Ações',         dados.acoes.length)}
+        ${linha('Análises SWOT', dados.swots.length)}
+      </div>
+      <div class="import-bloco">
+        <h4>Se somar aos dados atuais</h4>
+        ${linha('Companhias novas',    '+' + r.compNovas,  'somar')}
+        ${linha('Comerciais novos',    '+' + r.comNovos,   'somar')}
+        ${linha('Ações novas',         '+' + r.acoesNovas, 'somar')}
+        ${linha('Análises SWOT novas', '+' + r.swotNovas,  'somar')}
+        ${r.comAmpliados ? linha('Carteiras ampliadas', r.comAmpliados) : ''}
+        ${r.compExistentes ? linha('Companhias já cadastradas (reaproveitadas)', r.compExistentes, 'ignorar') : ''}
+        ${r.acoesRepetidas ? linha('Ações repetidas (ignoradas)', r.acoesRepetidas, 'ignorar') : ''}
+        ${r.swotRepetidas ? linha('Análises repetidas (ignoradas)', r.swotRepetidas, 'ignorar') : ''}
+      </div>
+      <div class="backup-aviso" style="margin-top:0">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></svg>
+        <span><b>Somar</b> mantém o que já existe e acrescenta apenas o que falta, casando companhias pela sigla e comerciais pelo nome. <b>Substituir tudo</b> descarta o cadastro atual deste navegador.</span>
+      </div>`;
 
-        // Redesenha o sistema inteiro com os dados importados
-        ['#filtroComercial','#filtroCompanhia','#filtroResponsavel','#filtroStatus','#filtroPrioridade',
-         '#filtroSwotCompanhia','#filtroSwotResponsavel','#boletimEscopo'].forEach(sel => { if($(sel)) $(sel).value = ''; });
-        boletimAtual = null;
-        $('#areaBoletim').innerHTML = '';
-        $('#btnBoletimPdf').style.display = 'none';
-
-        preencherSelects();
-        preencherEscopoBoletim();
-        limparFormularioSwot();
-        renderizarSwots();
-        renderizarComerciais();
-        renderizarCompanhias();
-        renderizarAcoes();
-        renderizarResumoBackup();
-        renderizarDashboard();
-        toast('Backup importado.');
-      });
+    abrirModal('modalImportar');
   };
 
   leitor.readAsText(arquivo);
+}
+
+function somarBackup(){
+  if(!importacaoPendente) return;
+  const r = importacaoPendente.mesclagem.resumo;
+  const total = r.compNovas + r.comNovos + r.acoesNovas + r.swotNovas;
+  aplicarDados(importacaoPendente.mesclagem,
+    total ? `Backup somado: ${total} ${total === 1 ? 'registro novo' : 'registros novos'}.` : 'Nada novo a somar: o arquivo já estava contemplado.');
+  fecharModal('modalImportar');
+  importacaoPendente = null;
+}
+
+function substituirBackup(){
+  if(!importacaoPendente) return;
+  const d = importacaoPendente.dados;
+  fecharModal('modalImportar');
+  $('#btnConfirmarExclusao').style.display = '';
+  confirmar('Substituir todos os dados',
+    `O cadastro atual deste navegador será descartado e trocado pelo conteúdo do arquivo. Esta ação não pode ser desfeita.`,
+    'Substituir',
+    () => {
+      aplicarDados(d, 'Dados substituídos pelo backup.');
+      importacaoPendente = null;
+    });
 }
 
 
@@ -3507,6 +3677,8 @@ function registrarEventos(){
   // Backup
   $('#btnExportarJson').addEventListener('click', exportarJson);
   $('#btnImportarJson').addEventListener('click', () => $('#arquivoJson').click());
+  $('#btnSomarBackup').addEventListener('click', somarBackup);
+  $('#btnSubstituirBackup').addEventListener('click', substituirBackup);
   $('#arquivoJson').addEventListener('change', e => {
     importarJson(e.target.files[0]);
     e.target.value = '';   // permite reimportar o mesmo arquivo
