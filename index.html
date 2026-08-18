@@ -569,6 +569,440 @@ tbody tr:hover{background:#FAFBFD}
   .pagina{padding:0}
   .card{box-shadow:none;border:none}
 }
+
+/* ==========================================================================
+   SIDEBAR — FIXAR / RECOLHER (complemento do comportamento já existente)
+   ========================================================================== */
+.sidebar-acoes{margin-top:auto;padding:14px 6px 12px}
+.btn-fixar{
+  display:flex;align-items:center;gap:10px;width:100%;
+  padding:9px 12px;border-radius:var(--raio-sm);
+  font-size:12.5px;font-weight:500;color:rgba(255,255,255,.62);
+  border:1px solid rgba(255,255,255,.1);transition:var(--transicao);
+}
+.btn-fixar svg{width:16px;height:16px;stroke-width:1.9;flex-shrink:0}
+.btn-fixar:hover{background:rgba(255,255,255,.08);color:#fff}
+.btn-fixar.ativo{background:rgba(115,198,255,.16);border-color:rgba(115,198,255,.35);color:var(--azul-claro)}
+.sidebar .sidebar-rodape{margin-top:0}
+body.recolhida .btn-fixar{justify-content:center;padding:9px 0}
+body.recolhida .btn-fixar b{display:none}
+
+/* Sidebar recolhida e não fixada: expande temporariamente ao passar o mouse,
+   sobrepondo o conteúdo (sem empurrar o layout). */
+@media (hover:hover) and (min-width:1025px){
+  body.recolhida:not(.sidebar-fixa) .sidebar:hover{
+    width:260px;padding:26px 18px;box-shadow:0 24px 60px rgba(5,10,52,.35);
+  }
+  body.recolhida:not(.sidebar-fixa) .sidebar:hover .brand{justify-content:flex-start;padding:0 6px 26px}
+  body.recolhida:not(.sidebar-fixa) .sidebar:hover .brand-text,
+  body.recolhida:not(.sidebar-fixa) .sidebar:hover .nav-label,
+  body.recolhida:not(.sidebar-fixa) .sidebar:hover .nav-item span,
+  body.recolhida:not(.sidebar-fixa) .sidebar:hover .btn-fixar b,
+  body.recolhida:not(.sidebar-fixa) .sidebar:hover .sidebar-rodape{display:block}
+  body.recolhida:not(.sidebar-fixa) .sidebar:hover .nav-item{justify-content:flex-start;padding:11px 14px}
+  body.recolhida:not(.sidebar-fixa) .sidebar:hover .btn-fixar{justify-content:flex-start;padding:9px 12px}
+}
+@media (max-width:1024px){
+  .sidebar-acoes{display:none}
+}
+
+/* ==========================================================================
+   ORGANOGRAMA — ferramenta visual (canvas, cartões e conexões)
+   Tudo aqui usa o prefixo .org- para não colidir com o restante do sistema.
+   ========================================================================== */
+#pagina-organograma{padding:0}
+#pagina-organograma.ativa{display:flex;flex-direction:column}
+
+.org-area{
+  /* Métricas do cartão — reescritas por JS conforme a personalização */
+  --org-card-w:212px;
+  --org-card-raio:16px;
+  --org-card-borda-l:1px;
+  --org-foto-tam:56px;
+  --org-foto-raio:50%;
+  --org-nome-fs:13.5px;
+  --org-cargo-fs:11.5px;
+  --org-meta-fs:10.8px;
+  --org-pad-x:14px;
+  --org-pad-t:16px;
+  --org-pad-b:14px;
+
+  /* Tema padrão: Autoglass */
+  --org-fundo:#F2F6FC;
+  --org-grid-cor:rgba(10,100,255,.13);
+  --org-grid-tam:22px;
+  --org-card-bg:#FFFFFF;
+  --org-card-borda:#E2E8F2;
+  --org-card-sombra:0 4px 16px rgba(5,10,52,.08);
+  --org-card-sombra-hover:0 14px 34px rgba(5,10,52,.16);
+  --org-titulo:#141A32;
+  --org-sub:#6B7280;
+  --org-meta:#8A94A6;
+  --org-linha:#A9BBD6;
+  --org-tag-bg:rgba(10,100,255,.09);
+  --org-tag-cor:#0A64FF;
+  --org-foto-bg:#EDF2FB;
+
+  display:flex;flex-direction:column;flex:1;min-width:0;
+  padding:18px 22px 22px;gap:13px;
+}
+.org-area.tema-claro{
+  --org-fundo:#FFFFFF;--org-grid-cor:rgba(5,10,52,.09);
+  --org-card-bg:#FFFFFF;--org-card-borda:#E5E9F0;--org-linha:#C6D0DE;
+  --org-tag-bg:#F1F4F9;--org-tag-cor:#5B6478;--org-foto-bg:#F4F6F9;
+}
+.org-area.tema-escuro{
+  --org-fundo:#080D2A;--org-grid-cor:rgba(115,198,255,.14);
+  --org-card-bg:#131A42;--org-card-borda:rgba(255,255,255,.11);
+  --org-card-sombra:0 6px 22px rgba(0,0,0,.35);
+  --org-card-sombra-hover:0 16px 40px rgba(0,0,0,.5);
+  --org-titulo:#F4F7FF;--org-sub:#9AA6C7;--org-meta:#7A86AC;
+  --org-linha:#3B4A86;--org-tag-bg:rgba(115,198,255,.14);--org-tag-cor:#8FD0FF;
+  --org-foto-bg:#1C2454;
+}
+.org-area.tema-minimalista{
+  --org-fundo:#FAFBFC;--org-grid-cor:rgba(5,10,52,.06);
+  --org-card-bg:#FFFFFF;--org-card-borda:#E8EBEF;
+  --org-card-sombra:none;--org-card-sombra-hover:0 6px 18px rgba(5,10,52,.09);
+  --org-card-raio:10px;--org-titulo:#22262F;--org-sub:#767C88;
+  --org-linha:#D3D8DE;--org-tag-bg:#F3F4F6;--org-tag-cor:#5C6270;--org-foto-bg:#F3F4F6;
+}
+/* Fundo do canvas independente do tema */
+.org-area.fundo-claro{--org-fundo:#FFFFFF;--org-grid-cor:rgba(5,10,52,.08)}
+.org-area.fundo-escuro{--org-fundo:#080D2A;--org-grid-cor:rgba(115,198,255,.13)}
+
+/* ---------- Barra de ferramentas ---------- */
+.org-barra{
+  display:flex;align-items:center;gap:10px;flex-wrap:wrap;
+  background:var(--branco);border:1px solid var(--borda);border-radius:var(--raio);
+  padding:10px 12px;box-shadow:var(--sombra-sm);
+}
+.org-barra-grupo{display:flex;align-items:center;gap:8px}
+.org-barra-grupo.direita{margin-left:auto}
+.org-divisor{width:1px;height:24px;background:var(--borda);flex-shrink:0}
+.org-seletor{
+  padding:8px 32px 8px 12px;border:1.5px solid var(--borda);border-radius:var(--raio-sm);
+  background:var(--branco);font-size:12.5px;font-weight:500;color:var(--azul-escuro);
+  appearance:none;transition:var(--transicao);max-width:230px;min-width:150px;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%236B7280' stroke-width='2.4' stroke-linecap='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 10px center;
+}
+.org-seletor:hover{border-color:#CFD8E3}
+.org-seletor:focus{outline:none;border-color:var(--azul-principal);box-shadow:0 0 0 4px rgba(10,100,255,.1)}
+.org-contagem{font-size:11.5px;color:var(--texto-suave);white-space:nowrap}
+.org-contagem b{color:var(--azul-escuro);font-weight:600}
+
+/* Menu suspenso da barra (exportar / mais opções) */
+.org-drop{position:relative}
+.org-drop-menu{
+  position:absolute;top:calc(100% + 8px);right:0;min-width:236px;z-index:45;
+  background:var(--branco);border:1px solid var(--borda);border-radius:var(--raio);
+  box-shadow:var(--sombra-lg);padding:7px;display:none;
+}
+.org-drop-menu.aberto{display:block;animation:sobe .16s ease}
+.org-drop-menu button{
+  width:100%;display:flex;align-items:center;gap:10px;padding:9px 11px;border-radius:9px;
+  font-size:12.8px;font-weight:500;color:var(--texto);text-align:left;transition:var(--transicao);
+}
+.org-drop-menu button svg{width:16px;height:16px;stroke-width:1.9;color:var(--azul-principal);flex-shrink:0}
+.org-drop-menu button:hover{background:var(--cinza-claro);color:var(--azul-principal)}
+.org-drop-menu button.perigo svg{color:var(--vermelho)}
+.org-drop-menu button.perigo:hover{background:#FEF2F2;color:var(--vermelho)}
+.org-drop-menu hr{border:none;border-top:1px solid var(--borda);margin:5px 4px}
+
+/* ---------- Corpo: palco + painel ---------- */
+.org-corpo{
+  position:relative;display:flex;gap:0;min-width:0;
+  height:calc(100vh - 196px);min-height:440px;
+}
+@supports (height:100dvh){.org-corpo{height:calc(100dvh - 196px)}}
+.org-area:fullscreen{padding:14px;background:var(--cinza-claro)}
+.org-area:fullscreen .org-corpo{height:calc(100vh - 92px)}
+
+.org-palco{
+  position:relative;flex:1;min-width:0;overflow:hidden;
+  border:1px solid var(--borda);border-radius:var(--raio-lg);
+  background-color:var(--org-fundo);
+  touch-action:none;cursor:grab;
+  transition:background-color var(--transicao);
+}
+.org-palco.arrastando-canvas{cursor:grabbing}
+.org-palco.grid-pontos{
+  background-image:radial-gradient(circle at 1px 1px, var(--org-grid-cor) 1.4px, transparent 0);
+}
+.org-palco.grid-linhas{
+  background-image:linear-gradient(var(--org-grid-cor) 1px, transparent 1px),
+                   linear-gradient(90deg, var(--org-grid-cor) 1px, transparent 1px);
+}
+.org-mundo{
+  position:absolute;top:0;left:0;width:10000px;height:7000px;
+  transform-origin:0 0;will-change:transform;
+}
+.org-linhas{
+  position:absolute;top:0;left:0;width:100%;height:100%;
+  overflow:visible;pointer-events:none;
+}
+.org-conexao{
+  fill:none;stroke:var(--org-linha);stroke-width:var(--org-linha-esp,1.6);
+  stroke-linecap:round;stroke-linejoin:round;
+}
+.org-conexao.destacada{stroke:var(--azul-principal);stroke-width:calc(var(--org-linha-esp,1.6) + .8)}
+.org-fantasma{
+  fill:none;stroke:var(--azul-principal);stroke-width:2;stroke-dasharray:6 6;
+  stroke-linecap:round;opacity:.85;
+}
+
+/* ---------- Cartão de colaborador ---------- */
+.org-card{
+  position:absolute;top:0;left:0;width:var(--org-card-w);
+  background:var(--org-card-bg);
+  border:var(--org-card-borda-l) solid var(--org-card-borda);
+  border-radius:var(--org-card-raio);
+  box-shadow:var(--org-card-sombra);
+  padding:var(--org-pad-t) var(--org-pad-x) var(--org-pad-b);
+  display:flex;flex-direction:column;align-items:center;text-align:center;
+  cursor:grab;user-select:none;-webkit-user-select:none;touch-action:none;
+  transform-origin:0 0;
+  transition:box-shadow .18s ease, border-color .18s ease;
+}
+.org-card::before{
+  content:'';position:absolute;inset:0 0 auto 0;height:3px;
+  background:var(--cor,var(--azul-principal));opacity:.9;
+  border-radius:var(--org-card-raio) var(--org-card-raio) 0 0;
+}
+.org-card:hover{box-shadow:var(--org-card-sombra-hover);border-color:var(--cor,var(--azul-principal))}
+.org-card.selecionado{border-color:var(--cor,var(--azul-principal));box-shadow:0 0 0 3px color-mix(in srgb, var(--cor,#0A64FF) 22%, transparent), var(--org-card-sombra-hover)}
+.org-card.arrastando{cursor:grabbing;box-shadow:0 22px 48px rgba(5,10,52,.26);z-index:5}
+.org-card.alvo-conexao{border-color:var(--verde);box-shadow:0 0 0 3px rgba(15,169,104,.22)}
+.org-card.esmaecido{opacity:.4}
+
+.org-foto{
+  width:var(--org-foto-tam);height:var(--org-foto-tam);border-radius:var(--org-foto-raio);
+  background:var(--org-foto-bg) center/cover no-repeat;flex-shrink:0;
+  display:grid;place-items:center;margin-bottom:10px;
+  font-size:calc(var(--org-foto-tam) * .34);font-weight:600;color:var(--cor,var(--azul-principal));
+  box-shadow:0 0 0 2px var(--org-card-bg), 0 0 0 3px color-mix(in srgb, var(--cor,#0A64FF) 30%, transparent);
+}
+.org-nome{
+  font-size:var(--org-nome-fs);font-weight:600;line-height:1.32;color:var(--org-titulo);
+  letter-spacing:-.2px;overflow:hidden;width:100%;
+}
+.org-cargo{
+  font-size:var(--org-cargo-fs);line-height:1.35;color:var(--org-sub);
+  overflow:hidden;width:100%;margin-top:3px;
+}
+.org-etiqueta{
+  margin-top:9px;display:inline-flex;align-items:center;max-width:100%;
+  padding:3px 10px;border-radius:20px;font-size:10.5px;font-weight:500;
+  background:var(--org-tag-bg);color:var(--org-tag-cor);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.org-metas{margin-top:8px;width:100%;display:flex;flex-direction:column;gap:2px}
+.org-meta-linha{
+  font-size:var(--org-meta-fs);line-height:1.4;color:var(--org-meta);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.org-diretos{
+  margin-top:9px;display:inline-flex;align-items:center;gap:5px;
+  font-size:10px;font-weight:500;color:var(--org-meta);
+}
+.org-diretos::before{content:'';width:5px;height:5px;border-radius:50%;background:var(--cor,var(--azul-principal))}
+
+/* Alça de conexão (arraste para vincular um subordinado) */
+.org-alca{
+  position:absolute;bottom:-7px;left:50%;transform:translateX(-50%);
+  width:16px;height:16px;border-radius:50%;
+  background:var(--branco);border:2px solid var(--cor,var(--azul-principal));
+  cursor:crosshair;opacity:0;transition:opacity .15s ease, transform .15s ease;
+  display:grid;place-items:center;
+}
+.org-alca::after{content:'';width:4px;height:4px;border-radius:50%;background:var(--cor,var(--azul-principal))}
+.org-card:hover .org-alca,.org-card.selecionado .org-alca{opacity:1}
+.org-alca:hover{transform:translateX(-50%) scale(1.25)}
+@media (hover:none) and (pointer:coarse){.org-alca{opacity:.7}}
+
+/* ---------- Controles do canvas ---------- */
+.org-controles{
+  position:absolute;right:14px;bottom:14px;z-index:6;
+  display:flex;flex-direction:column;gap:5px;padding:5px;
+  background:rgba(255,255,255,.92);backdrop-filter:blur(6px);
+  border:1px solid var(--borda);border-radius:14px;box-shadow:var(--sombra);
+}
+.org-controles button{
+  width:33px;height:33px;border-radius:9px;display:grid;place-items:center;
+  color:var(--texto-suave);transition:var(--transicao);
+}
+.org-controles button svg{width:16px;height:16px;stroke-width:1.9}
+.org-controles button:hover{background:var(--azul-principal);color:#fff}
+.org-controles i{height:1px;background:var(--borda);margin:2px 4px}
+.org-selo{
+  position:absolute;left:14px;bottom:14px;z-index:6;
+  padding:6px 11px;border-radius:20px;font-size:11px;font-weight:500;
+  background:rgba(255,255,255,.92);backdrop-filter:blur(6px);
+  border:1px solid var(--borda);color:var(--texto-suave);box-shadow:var(--sombra-sm);
+}
+
+/* ---------- Dicas de primeiro uso ---------- */
+.org-dicas{
+  position:absolute;left:14px;top:14px;z-index:6;max-width:300px;
+  pointer-events:none;
+  background:rgba(255,255,255,.95);backdrop-filter:blur(8px);
+  border:1px solid var(--borda);border-radius:var(--raio);
+  box-shadow:var(--sombra);padding:14px 16px;
+  animation:sobe .3s ease;
+}
+.org-dicas h4{font-size:12px;font-weight:600;color:var(--azul-escuro);margin-bottom:8px;letter-spacing:-.1px}
+.org-dicas ul{list-style:none;display:flex;flex-direction:column;gap:6px}
+.org-dicas li{font-size:11.8px;line-height:1.45;color:var(--texto-suave);padding-left:15px;position:relative}
+.org-dicas li::before{
+  content:'';position:absolute;left:2px;top:6px;width:5px;height:5px;border-radius:2px;background:var(--azul-claro);
+}
+.org-dicas button{
+  margin-top:11px;font-size:11.5px;font-weight:500;color:var(--azul-principal);
+  pointer-events:auto;
+}
+.org-dicas button:hover{text-decoration:underline}
+
+/* ---------- Estado vazio ---------- */
+.org-vazio-canvas{
+  position:absolute;inset:0;display:grid;place-items:center;padding:24px;text-align:center;z-index:4;
+  pointer-events:none;
+}
+.org-vazio-canvas div{max-width:340px;pointer-events:auto}
+.org-vazio-canvas .org-vazio-icone{
+  width:58px;height:58px;margin:0 auto 14px;border-radius:18px;
+  background:var(--branco);border:1px solid var(--borda);display:grid;place-items:center;
+  color:var(--azul-principal);box-shadow:var(--sombra-sm);
+}
+.org-vazio-canvas .org-vazio-icone svg{width:26px;height:26px;stroke-width:1.6}
+.org-vazio-canvas h3{font-size:15px;font-weight:600;color:var(--azul-escuro);margin-bottom:6px}
+.org-vazio-canvas p{font-size:12.8px;color:var(--texto-suave);line-height:1.6;margin-bottom:16px}
+
+/* ---------- Painel de personalização ---------- */
+.org-painel{
+  width:0;flex-shrink:0;overflow:hidden;
+  transition:width var(--transicao), margin var(--transicao);
+}
+.org-painel.aberto{width:298px;margin-left:14px}
+.org-painel-interno{
+  width:298px;height:100%;overflow-y:auto;
+  background:var(--branco);border:1px solid var(--borda);border-radius:var(--raio-lg);
+  padding:18px;box-shadow:var(--sombra-sm);
+}
+.org-painel-topo{display:flex;align-items:center;gap:10px;margin-bottom:16px}
+.org-painel-topo h3{font-size:14px;font-weight:600;letter-spacing:-.2px}
+.org-painel-topo p{font-size:11.5px;color:var(--texto-suave)}
+.org-painel-topo button{margin-left:auto;width:30px;height:30px;border-radius:9px;display:grid;place-items:center;background:var(--cinza-claro);color:var(--texto-suave)}
+.org-painel-topo button:hover{background:#FEF2F2;color:var(--vermelho)}
+.org-painel-topo button svg{width:15px;height:15px;stroke-width:2}
+.org-grupo{padding:14px 0;border-top:1px solid var(--borda)}
+.org-grupo:first-of-type{border-top:none;padding-top:0}
+.org-grupo>label:not(.org-check){
+  display:block;font-size:10.5px;font-weight:600;text-transform:uppercase;
+  letter-spacing:.9px;color:var(--texto-suave);margin-bottom:10px;
+}
+.org-opcoes{display:flex;flex-wrap:wrap;gap:6px}
+.org-opcao{
+  padding:7px 12px;border-radius:9px;border:1.5px solid var(--borda);
+  font-size:11.8px;font-weight:500;color:var(--texto-suave);
+  background:var(--branco);transition:var(--transicao);
+}
+.org-opcao:hover{border-color:#CFD8E3;color:var(--texto)}
+.org-opcao.ativa{border-color:var(--azul-principal);background:rgba(10,100,255,.07);color:var(--azul-principal)}
+.org-linha-campo{display:flex;align-items:center;gap:10px;margin-top:10px}
+.org-linha-campo label{font-size:12px;color:var(--texto-suave);flex:1}
+.org-linha-campo input[type=range]{width:110px;accent-color:var(--azul-principal)}
+.org-linha-campo input[type=color]{
+  width:34px;height:28px;padding:0;border:1.5px solid var(--borda);
+  border-radius:8px;background:none;cursor:pointer;
+}
+.org-check{
+  display:flex;align-items:center;gap:10px;padding:8px 0;font-size:12.5px;cursor:pointer;
+}
+.org-check input{width:16px;height:16px;accent-color:var(--azul-principal);cursor:pointer;flex-shrink:0}
+
+/* ---------- Menu de contexto ---------- */
+.org-menu-contexto{
+  position:fixed;z-index:100;min-width:212px;padding:7px;display:none;
+  background:var(--branco);border:1px solid var(--borda);border-radius:var(--raio);
+  box-shadow:var(--sombra-lg);
+}
+.org-menu-contexto.aberto{display:block;animation:sobe .13s ease}
+.org-menu-contexto button{
+  width:100%;display:flex;align-items:center;gap:10px;padding:9px 11px;border-radius:9px;
+  font-size:12.8px;font-weight:500;color:var(--texto);text-align:left;transition:var(--transicao);
+}
+.org-menu-contexto button svg{width:16px;height:16px;stroke-width:1.9;color:var(--azul-principal);flex-shrink:0}
+.org-menu-contexto button:hover{background:var(--cinza-claro);color:var(--azul-principal)}
+.org-menu-contexto button.perigo svg{color:var(--vermelho)}
+.org-menu-contexto button.perigo:hover{background:#FEF2F2;color:var(--vermelho)}
+.org-menu-contexto hr{border:none;border-top:1px solid var(--borda);margin:5px 4px}
+.org-menu-titulo{
+  padding:6px 11px 8px;font-size:11px;color:var(--texto-suave);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:230px;
+}
+.org-menu-titulo b{display:block;font-size:12.5px;color:var(--azul-escuro);font-weight:600}
+
+/* ---------- Modal da pessoa: foto e cores ---------- */
+.org-foto-editor{display:flex;align-items:center;gap:16px}
+.org-foto-previa{
+  width:74px;height:74px;border-radius:var(--raio);flex-shrink:0;
+  background:var(--cinza-claro) center/cover no-repeat;
+  display:grid;place-items:center;font-size:24px;font-weight:600;color:var(--azul-claro);
+  border:1px solid var(--borda);
+}
+.org-foto-previa.circular{border-radius:50%}
+.org-foto-acoes{display:flex;flex-direction:column;gap:7px}
+.org-foto-acoes p{font-size:11.5px;color:var(--texto-suave);line-height:1.5}
+.org-cores{display:flex;flex-wrap:wrap;gap:8px}
+.org-cor{
+  width:28px;height:28px;border-radius:9px;border:2px solid transparent;
+  box-shadow:inset 0 0 0 2px var(--branco);transition:var(--transicao);
+}
+.org-cor:hover{transform:scale(1.08)}
+.org-cor.ativa{
+  border-color:var(--branco);
+  box-shadow:inset 0 0 0 2px var(--branco), 0 0 0 2px var(--azul-escuro);
+  transform:scale(1.06);
+}
+.org-visiveis{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:4px}
+
+/* ---------- Responsivo ---------- */
+@media (max-width:1024px){
+  .org-corpo{height:calc(100vh - 236px)}
+  .org-painel.aberto{
+    position:absolute;inset:0 0 0 auto;width:min(320px,100%);margin:0;z-index:20;
+  }
+  .org-painel-interno{width:100%;border-radius:var(--raio-lg)}
+}
+@media (max-width:720px){
+  .org-area{padding:14px 14px 16px;gap:10px}
+  .org-barra{padding:9px 10px;gap:8px}
+  .org-barra-grupo.direita{margin-left:0;width:100%}
+  .org-seletor{flex:1;max-width:none;min-width:0}
+  .org-divisor{display:none}
+  .org-contagem{display:none}
+  .org-corpo{height:calc(100vh - 250px);min-height:380px}
+  .org-dicas{max-width:calc(100% - 28px)}
+  .org-rotulo-btn{display:none}
+  .org-painel.aberto{width:100%}
+}
+
+/* ---------- Impressão ---------- */
+@media print{
+  .org-barra,.org-controles,.org-selo,.org-dicas,.org-painel{display:none!important}
+  .org-corpo{height:auto}
+  .org-palco{border:none;overflow:visible}
+}
+
+/* ---------- Estilos de cartão por pessoa ---------- */
+.org-nome,.org-cargo{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2}
+.org-card.estilo-solido{background:var(--org-card-bg)}
+@supports (background:color-mix(in srgb, red 9%, white)){
+  .org-card.estilo-solido{background:color-mix(in srgb, var(--cor,#0A64FF) 9%, var(--org-card-bg))}
+}
+.org-card.estilo-contorno{border-width:2px;border-color:var(--cor,var(--azul-principal))}
+.org-card.estilo-contorno::before{opacity:0}
 </style>
 </head>
 <body>
@@ -598,11 +1032,22 @@ tbody tr:hover{background:#FAFBFD}
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="3.5" width="17" height="17" rx="2.5"/><path d="M12 3.5v17M3.5 12h17"/></svg>
         <span>Análise SWOT</span>
       </button>
+      <button class="nav-item" data-pagina="organograma" title="Organograma">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="3" width="6" height="5" rx="1.5"/><rect x="2.5" y="16" width="6" height="5" rx="1.5"/><rect x="15.5" y="16" width="6" height="5" rx="1.5"/><path d="M12 8v4M5.5 16v-2.2h13V16"/></svg>
+        <span>Organograma</span>
+      </button>
       <button class="nav-item" data-pagina="boletim" title="Boletim">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4h11l3 3v13a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1z"/><path d="M8 10h8M8 14h8M8 18h5"/></svg>
         <span>Boletim</span>
       </button>
     </nav>
+
+    <div class="sidebar-acoes">
+      <button class="btn-fixar" id="btnFixarSidebar" title="Fixar a barra lateral aberta">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4h6l-1 6 3.5 3.5H5.5L9 10z"/><path d="M12 13.5V20"/></svg>
+        <b id="rotuloFixar">Fixar barra lateral</b>
+      </button>
+    </div>
 
     <div class="sidebar-rodape">
       Dados salvos localmente neste navegador.
@@ -674,6 +1119,13 @@ tbody tr:hover{background:#FAFBFD}
             <b>Análise SWOT</b>
             <p>Matriz estratégica por companhia, com histórico filtrável por responsável.</p>
             <u id="hubQtdSwot">Abrir <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></u>
+          </button>
+
+          <button class="hub-card" data-hub="organograma" style="--cor:var(--azul-claro);--bg:rgba(115,198,255,.18)">
+            <div class="hub-icone"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="3" width="6" height="5" rx="1.5"/><rect x="2.5" y="16" width="6" height="5" rx="1.5"/><rect x="15.5" y="16" width="6" height="5" rx="1.5"/><path d="M12 8v4M5.5 16v-2.2h13V16"/></svg></div>
+            <b>Organograma</b>
+            <p>Monte a estrutura da equipe em um canvas visual, com cartões arrastáveis e exportação.</p>
+            <u id="hubQtdOrganograma">Abrir <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></u>
           </button>
 
           <button class="hub-card" data-hub="boletim" style="--cor:var(--roxo);--bg:rgba(124,92,252,.12)">
@@ -1029,6 +1481,220 @@ tbody tr:hover{background:#FAFBFD}
       </div>
     </section>
 
+    <!-- ---------- ORGANOGRAMA ---------- -->
+    <section class="pagina" id="pagina-organograma">
+      <div class="org-area tema-autoglass" id="orgArea">
+
+        <!-- Barra de ferramentas -->
+        <div class="org-barra">
+          <div class="org-barra-grupo">
+            <select class="org-seletor" id="orgSeletor" title="Organograma em edição"></select>
+            <span class="org-contagem" id="orgContagem"><b>0</b> pessoas</span>
+          </div>
+
+          <div class="org-barra-grupo direita">
+            <button class="btn btn-claro btn-sm" id="orgBtnOrganizar" title="Reorganizar automaticamente pela hierarquia">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="3" width="6" height="5" rx="1.5"/><rect x="3" y="16" width="6" height="5" rx="1.5"/><rect x="15" y="16" width="6" height="5" rx="1.5"/><path d="M12 8v4M6 16v-2h12v2"/></svg>
+              <span class="org-rotulo-btn">Organizar</span>
+            </button>
+            <button class="btn btn-claro btn-sm" id="orgBtnPersonalizar" title="Personalizar tema, cartões e conexões">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2.2"/><circle cx="8" cy="17" r="2.2"/></svg>
+              <span class="org-rotulo-btn">Personalizar</span>
+            </button>
+            <div class="org-divisor"></div>
+            <button class="btn btn-primario btn-sm" id="orgBtnNovaPessoa">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+              <span class="org-rotulo-btn">Adicionar pessoa</span>
+            </button>
+            <div class="org-drop">
+              <button class="btn-pontos" id="orgBtnMais" aria-label="Mais opções do organograma" aria-haspopup="true" aria-expanded="false">
+                <svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="1.9"/><circle cx="12" cy="12" r="1.9"/><circle cx="12" cy="19" r="1.9"/></svg>
+              </button>
+              <div class="org-drop-menu" id="orgMenuMais" role="menu">
+                <button data-org-acao="png" role="menuitem">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2.5"/><path d="M3 16l5-4 4 3 3-2 6 4"/><circle cx="8.5" cy="9" r="1.4"/></svg>
+                  Exportar imagem PNG
+                </button>
+                <button data-org-acao="pdf" role="menuitem">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8l-5-5z"/><path d="M9 13h6M9 17h4"/></svg>
+                  Exportar PDF
+                </button>
+                <hr>
+                <button data-org-acao="json" role="menuitem">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="M8 11l4 4 4-4"/><path d="M4 19h16"/></svg>
+                  Baixar estrutura em JSON
+                </button>
+                <button data-org-acao="importar" role="menuitem">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V3"/><path d="M8 7l4-4 4 4"/><path d="M4 19h16"/></svg>
+                  Importar estrutura JSON
+                </button>
+                <hr>
+                <button data-org-acao="novo" role="menuitem">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="3"/><path d="M12 9v6M9 12h6"/></svg>
+                  Novo organograma
+                </button>
+                <button data-org-acao="duplicar" role="menuitem">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="11" height="11" rx="2.5"/><path d="M15 6.5A2.5 2.5 0 0 0 12.5 4H6.5A2.5 2.5 0 0 0 4 6.5v6A2.5 2.5 0 0 0 6.5 15"/></svg>
+                  Duplicar organograma
+                </button>
+                <button data-org-acao="renomear" role="menuitem">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4l10-10a2.5 2.5 0 0 0-3.5-3.5L4.5 16.5z"/><path d="M14.5 6.5l3 3"/></svg>
+                  Renomear organograma
+                </button>
+                <button data-org-acao="excluir" class="perigo" role="menuitem">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/></svg>
+                  Excluir organograma
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Palco (canvas) + painel de personalização -->
+        <div class="org-corpo">
+          <div class="org-palco grid-pontos" id="orgPalco">
+            <div class="org-mundo" id="orgMundo">
+              <svg class="org-linhas" id="orgLinhas" aria-hidden="true"></svg>
+              <div id="orgCards"></div>
+            </div>
+
+            <div class="org-vazio-canvas" id="orgVazio" style="display:none">
+              <div>
+                <div class="org-vazio-icone">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="6" r="2.6"/><circle cx="5.5" cy="18" r="2.6"/><circle cx="18.5" cy="18" r="2.6"/><path d="M12 8.6v3.4M5.5 15.4V13h13v2.4"/></svg>
+                </div>
+                <h3>Comece pela liderança</h3>
+                <p>Adicione a primeira pessoa e vá conectando os subordinados. Você pode arrastar os cartões livremente pelo canvas.</p>
+                <button class="btn btn-primario btn-sm" id="orgBtnPrimeira">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+                  Adicionar pessoa
+                </button>
+              </div>
+            </div>
+
+            <div class="org-dicas" id="orgDicas" style="display:none">
+              <h4>Como usar o canvas</h4>
+              <ul>
+                <li>Arraste os cartões para organizar. Com <b>Shift</b>, leva a equipe junto.</li>
+                <li>Duplo clique abre a edição. Clique com o botão direito para mais opções.</li>
+                <li>Puxe a bolinha na base do cartão até outra pessoa para criar o vínculo.</li>
+                <li>Scroll aplica zoom e arrastar o fundo move o canvas.</li>
+              </ul>
+              <button id="orgBtnFecharDicas">Entendi, ocultar dicas</button>
+            </div>
+
+            <div class="org-selo" id="orgSelo">100%</div>
+
+            <div class="org-controles">
+              <button id="orgZoomMais" title="Aproximar" aria-label="Aproximar">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"><path d="M12 6v12M6 12h12"/></svg>
+              </button>
+              <button id="orgZoomMenos" title="Afastar" aria-label="Afastar">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"><path d="M6 12h12"/></svg>
+              </button>
+              <i></i>
+              <button id="orgZoomReset" title="Zoom 100%" aria-label="Zoom 100%">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4 4M8.5 11h5"/></svg>
+              </button>
+              <button id="orgCentralizar" title="Centralizar organograma" aria-label="Centralizar organograma">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9V5.5A1.5 1.5 0 0 1 5.5 4H9M15 4h3.5A1.5 1.5 0 0 1 20 5.5V9M20 15v3.5a1.5 1.5 0 0 1-1.5 1.5H15M9 20H5.5A1.5 1.5 0 0 1 4 18.5V15"/><circle cx="12" cy="12" r="2.2"/></svg>
+              </button>
+              <button id="orgTelaCheia" title="Tela cheia" aria-label="Tela cheia">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>
+              </button>
+            </div>
+          </div>
+
+          <!-- Painel de personalização -->
+          <aside class="org-painel" id="orgPainel">
+            <div class="org-painel-interno">
+              <div class="org-painel-topo">
+                <div>
+                  <h3>Personalizar</h3>
+                  <p>Aplicado a este organograma</p>
+                </div>
+                <button id="orgFecharPainel" aria-label="Fechar painel">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+                </button>
+              </div>
+
+              <div class="org-grupo">
+                <label>Tema</label>
+                <div class="org-opcoes" data-org-config="tema">
+                  <button class="org-opcao" data-valor="autoglass">Autoglass</button>
+                  <button class="org-opcao" data-valor="claro">Claro</button>
+                  <button class="org-opcao" data-valor="escuro">Escuro</button>
+                  <button class="org-opcao" data-valor="minimalista">Minimalista</button>
+                </div>
+              </div>
+
+              <div class="org-grupo">
+                <label>Cartões</label>
+                <div class="org-opcoes" data-org-config="cardTamanho">
+                  <button class="org-opcao" data-valor="compacto">Compacto</button>
+                  <button class="org-opcao" data-valor="padrao">Padrão</button>
+                  <button class="org-opcao" data-valor="grande">Grande</button>
+                </div>
+                <div class="org-opcoes" style="margin-top:8px" data-org-config="cardFormato">
+                  <button class="org-opcao" data-valor="arredondado">Cantos suaves</button>
+                  <button class="org-opcao" data-valor="reto">Cantos retos</button>
+                  <button class="org-opcao" data-valor="pilula">Bem arredondado</button>
+                </div>
+                <div class="org-opcoes" style="margin-top:8px" data-org-config="fotoFormato">
+                  <button class="org-opcao" data-valor="circular">Foto circular</button>
+                  <button class="org-opcao" data-valor="quadrada">Foto quadrada</button>
+                </div>
+                <label class="org-check"><input type="checkbox" data-org-check="cardBorda"> Mostrar borda</label>
+                <label class="org-check"><input type="checkbox" data-org-check="cardSombra"> Mostrar sombra</label>
+                <label class="org-check"><input type="checkbox" data-org-check="mostrarFoto"> Mostrar foto</label>
+                <label class="org-check"><input type="checkbox" data-org-check="mostrarDiretos"> Mostrar nº de subordinados diretos</label>
+              </div>
+
+              <div class="org-grupo">
+                <label>Conexões</label>
+                <div class="org-opcoes" data-org-config="linhaEstilo">
+                  <button class="org-opcao" data-valor="ortogonal">Em ângulo</button>
+                  <button class="org-opcao" data-valor="curva">Curva</button>
+                  <button class="org-opcao" data-valor="reta">Reta</button>
+                </div>
+                <div class="org-linha-campo">
+                  <label for="orgLinhaEsp">Espessura</label>
+                  <input type="range" id="orgLinhaEsp" min="1" max="4" step="0.2">
+                </div>
+                <div class="org-linha-campo">
+                  <label for="orgLinhaCor">Cor da linha</label>
+                  <input type="color" id="orgLinhaCor">
+                  <button class="org-opcao" id="orgLinhaCorAuto">Automática</button>
+                </div>
+                <label class="org-check"><input type="checkbox" data-org-check="linhaTracejada"> Linha tracejada</label>
+              </div>
+
+              <div class="org-grupo">
+                <label>Canvas</label>
+                <div class="org-opcoes" data-org-config="canvasFundo">
+                  <button class="org-opcao" data-valor="auto">Do tema</button>
+                  <button class="org-opcao" data-valor="claro">Fundo claro</button>
+                  <button class="org-opcao" data-valor="escuro">Fundo escuro</button>
+                </div>
+                <div class="org-opcoes" style="margin-top:8px" data-org-config="canvasGrid">
+                  <button class="org-opcao" data-valor="pontos">Grid de pontos</button>
+                  <button class="org-opcao" data-valor="linhas">Grid de linhas</button>
+                  <button class="org-opcao" data-valor="nenhum">Sem grid</button>
+                </div>
+              </div>
+
+              <div class="org-grupo">
+                <button class="btn btn-claro btn-sm" id="orgRestaurarPadrao" style="width:100%;justify-content:center">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12a8 8 0 1 0 2.5-5.8"/><path d="M4 4v4h4"/></svg>
+                  Restaurar padrão Autoglass
+                </button>
+              </div>
+            </div>
+          </aside>
+        </div>
+      </div>
+    </section>
+
   </div>
 </div>
 
@@ -1295,6 +1961,180 @@ tbody tr:hover{background:#FAFBFD}
   </div>
 </div>
 
+
+<!-- ====================== MODAL PESSOA (ORGANOGRAMA) ====================== -->
+<div class="modal" id="modalPessoa">
+  <div class="modal-caixa">
+    <div class="modal-cabecalho">
+      <div>
+        <h2 id="orgTituloModal">Adicionar pessoa</h2>
+        <p>Os dados ficam no organograma selecionado</p>
+      </div>
+      <button class="modal-fechar" data-fechar="modalPessoa" aria-label="Fechar">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <div class="modal-corpo">
+      <div class="form-grade">
+
+        <div class="form-secao"><span>Identificação</span><i></i></div>
+
+        <div class="campo col-2">
+          <label>Foto</label>
+          <div class="org-foto-editor">
+            <div class="org-foto-previa circular" id="orgFotoPrevia">?</div>
+            <div class="org-foto-acoes">
+              <div style="display:flex;gap:7px;flex-wrap:wrap">
+                <button class="btn btn-claro btn-sm" id="orgBtnFoto">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V4"/><path d="M8 8l4-4 4 4"/><path d="M4 16v2.5A1.5 1.5 0 0 0 5.5 20h13a1.5 1.5 0 0 0 1.5-1.5V16"/></svg>
+                  Enviar foto
+                </button>
+                <button class="btn btn-perigo btn-sm" id="orgBtnRemoverFoto">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+                  Remover
+                </button>
+              </div>
+              <p>JPG ou PNG. A imagem é reduzida automaticamente antes de ser salva. Sem foto, o cartão mostra as iniciais.</p>
+              <input type="file" id="orgArquivoFoto" accept="image/*" style="display:none">
+            </div>
+          </div>
+        </div>
+
+        <div class="campo">
+          <label for="orgNome">Nome <b>*</b></label>
+          <input type="text" id="orgNome" placeholder="Ex.: Gabriel Polli" maxlength="60">
+        </div>
+        <div class="campo">
+          <label for="orgCargo">Cargo</label>
+          <input type="text" id="orgCargo" placeholder="Ex.: Executivo Comercial" maxlength="60">
+        </div>
+        <div class="campo">
+          <label for="orgAreaCampo">Área / Departamento</label>
+          <input type="text" id="orgAreaCampo" list="orgListaAreas" placeholder="Ex.: Comercial" maxlength="40">
+          <datalist id="orgListaAreas"></datalist>
+        </div>
+        <div class="campo">
+          <label for="orgGestor">Gestor</label>
+          <select id="orgGestor"></select>
+        </div>
+        <div class="campo">
+          <label for="orgEmail">E-mail</label>
+          <input type="email" id="orgEmail" placeholder="nome@empresa.com.br" maxlength="80">
+        </div>
+        <div class="campo">
+          <label for="orgTelefone">Telefone</label>
+          <input type="text" id="orgTelefone" placeholder="(00) 00000-0000" maxlength="30">
+        </div>
+        <div class="campo col-2">
+          <label for="orgObs">Observação</label>
+          <textarea id="orgObs" placeholder="Anotações internas, escopo de atuação, regional..." maxlength="300"></textarea>
+        </div>
+
+        <div class="form-secao"><span>Aparência do cartão</span><i></i></div>
+
+        <div class="campo">
+          <label>Cor de destaque</label>
+          <div class="org-cores" id="orgCores"></div>
+        </div>
+        <div class="campo">
+          <label>Estilo</label>
+          <div class="org-opcoes" id="orgEstilos">
+            <button class="org-opcao" data-valor="padrao">Padrão</button>
+            <button class="org-opcao" data-valor="solido">Preenchido</button>
+            <button class="org-opcao" data-valor="contorno">Contornado</button>
+          </div>
+        </div>
+        <div class="campo col-2">
+          <label>Informações visíveis no cartão</label>
+          <div class="org-visiveis">
+            <label class="org-check"><input type="checkbox" data-org-visivel="cargo" checked> Cargo</label>
+            <label class="org-check"><input type="checkbox" data-org-visivel="area" checked> Área</label>
+            <label class="org-check"><input type="checkbox" data-org-visivel="email"> E-mail</label>
+            <label class="org-check"><input type="checkbox" data-org-visivel="telefone"> Telefone</label>
+            <label class="org-check"><input type="checkbox" data-org-visivel="gestor"> Gestor</label>
+            <label class="org-check"><input type="checkbox" data-org-visivel="obs"> Observação</label>
+          </div>
+        </div>
+
+      </div>
+    </div>
+    <div class="modal-rodape">
+      <button class="btn btn-perigo" id="orgBtnExcluirPessoa" style="display:none">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/></svg>
+        Excluir
+      </button>
+      <button class="btn btn-claro" data-fechar="modalPessoa">Cancelar</button>
+      <button class="btn btn-primario" id="orgBtnSalvarPessoa">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M5 5h11l3 3v11H5z"/><path d="M8 5v5h6V5M8 19v-5h8v5"/></svg>
+        Salvar
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ====================== MODAL NOME DO ORGANOGRAMA ====================== -->
+<div class="modal" id="modalOrgNome">
+  <div class="modal-caixa estreita">
+    <div class="modal-cabecalho">
+      <div>
+        <h2 id="orgTituloNome">Novo organograma</h2>
+        <p id="orgSubNome">Crie versões para comparar cenários</p>
+      </div>
+      <button class="modal-fechar" data-fechar="modalOrgNome" aria-label="Fechar">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <div class="modal-corpo">
+      <div class="campo">
+        <label for="orgNomeMapa">Nome <b>*</b></label>
+        <input type="text" id="orgNomeMapa" placeholder="Ex.: Estrutura comercial 2027" maxlength="60">
+      </div>
+    </div>
+    <div class="modal-rodape">
+      <button class="btn btn-claro" data-fechar="modalOrgNome">Cancelar</button>
+      <button class="btn btn-primario" id="orgBtnSalvarNome">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Menu de contexto do organograma -->
+<div class="org-menu-contexto" id="orgMenuContexto" role="menu">
+  <div class="org-menu-titulo" id="orgMenuTitulo"></div>
+  <hr>
+  <button data-org-menu="editar" role="menuitem">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4l10-10a2.5 2.5 0 0 0-3.5-3.5L4.5 16.5z"/><path d="M14.5 6.5l3 3"/></svg>
+    Editar
+  </button>
+  <button data-org-menu="subordinado" role="menuitem">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v9M8 17h8"/><path d="M12 13v4"/><circle cx="12" cy="20" r="2"/><path d="M9 4h6"/></svg>
+    Adicionar subordinado
+  </button>
+  <button data-org-menu="gestor" role="menuitem">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="5" r="2"/><path d="M12 7v4M9 20h6M12 11v9"/></svg>
+    Adicionar gestor acima
+  </button>
+  <button data-org-menu="desvincular" role="menuitem">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M9 15l-2 2a3.5 3.5 0 0 1-5-5l2-2M15 9l2-2a3.5 3.5 0 0 1 5 5l-2 2"/><path d="M4 4l16 16"/></svg>
+    Remover vínculo com o gestor
+  </button>
+  <hr>
+  <button data-org-menu="duplicar" role="menuitem">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="11" height="11" rx="2.5"/><path d="M15 6.5A2.5 2.5 0 0 0 12.5 4H6.5A2.5 2.5 0 0 0 4 6.5v6A2.5 2.5 0 0 0 6.5 15"/></svg>
+    Duplicar pessoa
+  </button>
+  <button data-org-menu="cor" role="menuitem">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M4 17l9-9 4 4-9 9H4z"/><path d="M14 4l3 3"/></svg>
+    Alterar cor de destaque
+  </button>
+  <hr>
+  <button data-org-menu="excluir" class="perigo" role="menuitem">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/></svg>
+    Excluir pessoa
+  </button>
+</div>
+
+<input type="file" id="orgArquivoJson" accept=".json,application/json" style="display:none">
+
 <!-- Marca d'água — troque o nome abaixo se necessário -->
 <div class="marca-dagua">Criado por: <b>Gabriel Aguiar</b></div>
 
@@ -1315,6 +2155,7 @@ const CHAVE_ACOES      = 'pa5w2h_acoes';
 const CHAVE_COMERCIAIS = 'pa5w2h_comerciais';
 const CHAVE_SWOT       = 'pa5w2h_swot';
 const CHAVE_SIDEBAR    = 'pa5w2h_sidebar';
+const CHAVE_SIDEBAR_FIXA = 'pa5w2h_sidebar_fixa';
 
 const STATUS      = ['Não iniciada','Em andamento','Concluída','Cancelada'];
 const PRIORIDADES = ['Alta','Média','Baixa'];
@@ -1329,6 +2170,7 @@ const PAGINAS = {
   dashboard:     {titulo:'Dashboard',            subtitulo:'Visão consolidada dos planos de ação'},
   plano:         {titulo:'Plano 5W2H',           subtitulo:'Cadastro e acompanhamento das ações'},
   swot:          {titulo:'Análise SWOT',         subtitulo:'Diagnóstico estratégico por companhia'},
+  organograma:   {titulo:'Organograma',           subtitulo:'Estrutura da equipe em um canvas visual'},
   boletim:       {titulo:'Boletim',             subtitulo:'Relatório executivo automático'},
   configuracoes: {titulo:'Configurações',        subtitulo:'Comerciais e companhias de seguro'}
 };
@@ -1622,6 +2464,7 @@ function irPara(pagina){
   window.scrollTo({top:0,behavior:'smooth'});
   if(pagina === 'dashboard') renderizarDashboard();
   if(pagina === 'hub') renderizarHub();
+  if(pagina === 'organograma') Organograma.aoAbrir();
 }
 
 /** Alterna os módulos da tela de Configurações. */
@@ -1642,16 +2485,43 @@ function alternarSidebar(){
     abrirSidebar();
     return;
   }
+  if(document.body.classList.contains('sidebar-fixa')){
+    toast('A barra lateral está fixada. Desmarque "Fixar" para recolher.');
+    return;
+  }
   const recolhida = document.body.classList.toggle('recolhida');
   localStorage.setItem(CHAVE_SIDEBAR, recolhida ? 'recolhida' : 'expandida');
   // Os gráficos precisam se readequar à nova largura disponível
   setTimeout(() => Object.values(graficos).forEach(g => g && g.resize()), 260);
 }
 
+/** Fixada, a barra permanece aberta e o botão de menu não a recolhe. */
+function alternarFixarSidebar(){
+  const fixa = document.body.classList.toggle('sidebar-fixa');
+  if(fixa) document.body.classList.remove('recolhida');
+  localStorage.setItem(CHAVE_SIDEBAR_FIXA, fixa ? 'sim' : 'nao');
+  localStorage.setItem(CHAVE_SIDEBAR, document.body.classList.contains('recolhida') ? 'recolhida' : 'expandida');
+  atualizarBotaoFixar();
+  setTimeout(() => Object.values(graficos).forEach(g => g && g.resize()), 260);
+  toast(fixa ? 'Barra lateral fixada.' : 'Barra lateral liberada: o botão de menu volta a recolher.');
+}
+
+function atualizarBotaoFixar(){
+  const btn = $('#btnFixarSidebar');
+  if(!btn) return;
+  const fixa = document.body.classList.contains('sidebar-fixa');
+  btn.classList.toggle('ativo', fixa);
+  btn.title = fixa ? 'Desafixar a barra lateral' : 'Fixar a barra lateral aberta';
+  $('#rotuloFixar').textContent = fixa ? 'Barra fixada' : 'Fixar barra lateral';
+}
+
 function restaurarSidebar(){
-  if(localStorage.getItem(CHAVE_SIDEBAR) === 'recolhida'){
+  if(localStorage.getItem(CHAVE_SIDEBAR_FIXA) === 'sim'){
+    document.body.classList.add('sidebar-fixa');
+  }else if(localStorage.getItem(CHAVE_SIDEBAR) === 'recolhida'){
     document.body.classList.add('recolhida');
   }
+  atualizarBotaoFixar();
 }
 
 function alternarMenuSuperior(){
@@ -3555,6 +4425,1727 @@ function substituirBackup(){
 }
 
 
+
+/* =========================================================
+   10.9 ORGANOGRAMA — ferramenta visual de estrutura
+   =========================================================
+   Módulo isolado. Só consome utilitários genéricos do sistema
+   ($, $$, escapar, gerarId, toast, confirmar, abrirModal,
+   fecharModal) e não altera nenhum estado dos outros módulos.
+
+   PERSISTÊNCIA: todo acesso a dados passa pelo objeto `repo`
+   (ver criarRepositorioLocal). Para migrar para Supabase basta
+   criar outro repositório com os mesmos métodos `ler`/`gravar`
+   e trocar a linha de instanciação — nada mais no módulo
+   conhece o localStorage.
+   ========================================================= */
+const Organograma = (function(){
+
+const CHAVE_ORG   = 'pa5w2h_organograma';
+const CHAVE_DICAS = 'pa5w2h_organograma_dicas';
+
+/* Cores de destaque disponíveis para os cartões */
+const PALETA = ['#0A64FF','#050A34','#2021D4','#0FA968','#F5A524','#E5484D','#7C5CFC','#0E7490','#DB2777','#64748B'];
+
+/* Métricas por tamanho de cartão (usadas na tela e na exportação) */
+const TAMANHOS = {
+  compacto:{w:184, foto:44, nome:12.5, cargo:10.8, meta:10,   padT:14, padB:12, padX:12, gapX:26, gapY:46},
+  padrao:  {w:212, foto:56, nome:13.5, cargo:11.5, meta:10.8, padT:16, padB:14, padX:14, gapX:32, gapY:54},
+  grande:  {w:248, foto:68, nome:15,   cargo:12.5, meta:11.5, padT:18, padB:16, padX:16, gapX:38, gapY:64}
+};
+const RAIOS = {reto:'4px', arredondado:'16px', pilula:'26px'};
+
+const LIMITE_MUNDO = {x:9600, y:6700};
+const ZOOM_MIN = 0.25, ZOOM_MAX = 2.2;
+
+const CONFIG_PADRAO = {
+  tema:'autoglass',
+  cardTamanho:'padrao',
+  cardFormato:'arredondado',
+  cardBorda:true,
+  cardSombra:true,
+  fotoFormato:'circular',
+  mostrarFoto:true,
+  mostrarDiretos:true,
+  linhaEstilo:'ortogonal',
+  linhaEspessura:1.6,
+  linhaCor:'auto',
+  linhaTracejada:false,
+  canvasFundo:'auto',
+  canvasGrid:'pontos'
+};
+
+const CAMPOS_VISIVEIS = ['cargo','area','email','telefone','gestor','obs'];
+
+/* ---------------------------------------------------------
+   Repositório de dados (ponto único de troca para Supabase)
+   --------------------------------------------------------- */
+function criarRepositorioLocal(chave){
+  return {
+    tipo:'localStorage',
+    ler(){
+      try{ return JSON.parse(localStorage.getItem(chave)); }
+      catch(e){ return null; }
+    },
+    gravar(estado){
+      try{ localStorage.setItem(chave, JSON.stringify(estado)); return true; }
+      catch(e){ return false; }
+    }
+  };
+}
+const repo = criarRepositorioLocal(CHAVE_ORG);
+
+/* ---------------------------------------------------------
+   Estado em memória
+   --------------------------------------------------------- */
+let estado    = {versao:1, atualId:null, organogramas:[]};
+let vista     = {x:0, y:0, escala:1};
+let alturas   = {};    // id da pessoa -> altura medida do cartão
+let elementos = {};    // id da pessoa -> elemento do cartão
+let arestas   = {};    // "pai>filho"  -> elemento <path>
+
+let selecionado = null;
+let contextoId  = null;
+let editandoPessoa = null;
+let rascunho = null;        // dados de aparência em edição no modal
+let modoNome = null;        // 'novo' | 'renomear' | 'duplicar'
+let iniciado = false, pendenteRender = true, medido = false, fontesConferidas = false;
+let salvarTimer = null;
+let cacheImagens = new Map();
+
+/* Interação */
+const ponteiros = new Map();
+let modo = null;            // 'pan' | 'card' | 'conexao' | 'pinca'
+let arraste = null;
+let conexao = null;
+let pinca = null;
+let quadroPendente = null;
+
+/* Atalhos de DOM (resolvidos na inicialização) */
+let area, palco, mundo, svg, caixaCards, vazio, dicas, selo, seletor, contagem, painel, menuCtx;
+
+/* ---------------------------------------------------------
+   Utilitários internos
+   --------------------------------------------------------- */
+function mapaAtual(){
+  return estado.organogramas.find(o => o.id === estado.atualId) || estado.organogramas[0] || null;
+}
+function config(){
+  const m = mapaAtual();
+  return m ? m.config : CONFIG_PADRAO;
+}
+function metricas(){
+  return TAMANHOS[config().cardTamanho] || TAMANHOS.padrao;
+}
+function pessoas(){
+  const m = mapaAtual();
+  return m ? m.pessoas : [];
+}
+function pessoa(id){
+  return pessoas().find(p => p.id === id) || null;
+}
+function alturaDe(id){
+  return alturas[id] || 176;
+}
+function iniciais(nome){
+  const partes = String(nome || '').trim().split(/\s+/).filter(Boolean);
+  if(!partes.length) return '?';
+  const primeira = partes[0][0] || '';
+  const ultima = partes.length > 1 ? partes[partes.length-1][0] : '';
+  return (primeira + ultima).toUpperCase();
+}
+function filhosDe(id){
+  return pessoas().filter(p => p.gestorId === id);
+}
+/** Um gestor não pode ser alguém que já esteja abaixo da pessoa. */
+function ehDescendente(idBase, idPossivel){
+  let atual = pessoa(idPossivel);
+  const visto = new Set();
+  while(atual && atual.gestorId && !visto.has(atual.id)){
+    visto.add(atual.id);
+    if(atual.gestorId === idBase) return true;
+    atual = pessoa(atual.gestorId);
+  }
+  return false;
+}
+function subarvore(id){
+  const ids = [id];
+  const fila = [id];
+  while(fila.length){
+    const atual = fila.shift();
+    filhosDe(atual).forEach(f => {
+      if(!ids.includes(f.id)){ ids.push(f.id); fila.push(f.id); }
+    });
+  }
+  return ids;
+}
+function limitar(valor, min, max){
+  return Math.min(max, Math.max(min, valor));
+}
+function agora(){ return new Date().toISOString(); }
+
+function baixarArquivo(blob, nome){
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = nome;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1500);
+}
+function slug(txt){
+  return String(txt || 'organograma').toLowerCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g,'')
+    .replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,'') || 'organograma';
+}
+
+/* ---------------------------------------------------------
+   Persistência
+   --------------------------------------------------------- */
+function agendarSalvar(){
+  clearTimeout(salvarTimer);
+  salvarTimer = setTimeout(salvar, 400);
+}
+function salvar(){
+  const m = mapaAtual();
+  if(m) m.atualizadoEm = agora();
+  if(!repo.gravar(estado)){
+    toast('Não foi possível salvar: o armazenamento do navegador está cheio. Exporte um backup e remova fotos grandes.','erro');
+  }
+}
+
+function normalizarPessoa(bruta, indice){
+  const p = bruta && typeof bruta === 'object' ? bruta : {};
+  const visiveis = {};
+  CAMPOS_VISIVEIS.forEach(c => {
+    visiveis[c] = p.visiveis && typeof p.visiveis === 'object'
+      ? !!p.visiveis[c]
+      : (c === 'cargo' || c === 'area');
+  });
+  return {
+    id: String(p.id || gerarId()),
+    nome: String(p.nome || 'Sem nome').slice(0,60),
+    cargo: String(p.cargo || '').slice(0,60),
+    area: String(p.area || '').slice(0,40),
+    email: String(p.email || '').slice(0,80),
+    telefone: String(p.telefone || '').slice(0,30),
+    obs: String(p.obs || '').slice(0,300),
+    gestorId: p.gestorId ? String(p.gestorId) : null,
+    foto: typeof p.foto === 'string' && p.foto.startsWith('data:image') && p.foto.length < 400000 ? p.foto : null,
+    cor: /^#[0-9a-fA-F]{6}$/.test(p.cor || '') ? p.cor : PALETA[indice % PALETA.length],
+    estilo: ['padrao','solido','contorno'].includes(p.estilo) ? p.estilo : 'padrao',
+    visiveis,
+    x: Number.isFinite(+p.x) ? limitar(+p.x, 0, LIMITE_MUNDO.x) : 80 + (indice % 5) * 250,
+    y: Number.isFinite(+p.y) ? limitar(+p.y, 0, LIMITE_MUNDO.y) : 80 + Math.floor(indice / 5) * 240
+  };
+}
+
+function normalizarMapa(bruto){
+  const m = bruto && typeof bruto === 'object' ? bruto : {};
+  const cfg = Object.assign({}, CONFIG_PADRAO, m.config && typeof m.config === 'object' ? m.config : {});
+  const pes = Array.isArray(m.pessoas) ? m.pessoas.map(normalizarPessoa) : [];
+  const ids = new Set(pes.map(p => p.id));
+  pes.forEach(p => { if(p.gestorId && !ids.has(p.gestorId)) p.gestorId = null; });
+  return {
+    id: String(m.id || gerarId()),
+    nome: String(m.nome || 'Organograma').slice(0,60),
+    pessoas: pes,
+    config: cfg,
+    vista: m.vista && Number.isFinite(+m.vista.escala) ? {x:+m.vista.x||0, y:+m.vista.y||0, escala:limitar(+m.vista.escala,ZOOM_MIN,ZOOM_MAX)} : null,
+    autoLayout: !!m.autoLayout,   // organiza sozinho na primeira abertura
+    criadoEm: m.criadoEm || agora(),
+    atualizadoEm: m.atualizadoEm || agora()
+  };
+}
+
+function carregar(){
+  const bruto = repo.ler();
+  if(bruto && Array.isArray(bruto.organogramas) && bruto.organogramas.length){
+    estado = {
+      versao: 1,
+      organogramas: bruto.organogramas.map(normalizarMapa),
+      atualId: bruto.atualId || null
+    };
+    if(!estado.organogramas.some(o => o.id === estado.atualId)){
+      estado.atualId = estado.organogramas[0].id;
+    }
+    return;
+  }
+  // Primeiro acesso: cria o organograma de demonstração
+  const demo = normalizarMapa(exemploInicial());
+  estado = {versao:1, organogramas:[demo], atualId:demo.id};
+  salvar();
+}
+
+/* ---------------------------------------------------------
+   DADOS DE EXEMPLO
+   Estrutura fictícia criada apenas no primeiro acesso, para
+   demonstrar o funcionamento. Pode ser excluída sem qualquer
+   impacto (exclua as pessoas ou o próprio organograma).
+   --------------------------------------------------------- */
+function exemploInicial(){
+  const id = n => 'demo-' + n;
+  const base = [
+    {id:id(1), nome:'Ana Beltrão',    cargo:'Diretora Comercial',      area:'Diretoria',  gestorId:null,  cor:PALETA[1]},
+    {id:id(2), nome:'Rafael Moretti', cargo:'Gerente Regional',        area:'Sudeste',    gestorId:id(1), cor:PALETA[0]},
+    {id:id(3), nome:'Carla Nunes',    cargo:'Gerente Regional',        area:'Sul',        gestorId:id(1), cor:PALETA[0]},
+    {id:id(4), nome:'Diego Prado',    cargo:'Coordenador Comercial',   area:'Sudeste',    gestorId:id(2), cor:PALETA[2]},
+    {id:id(5), nome:'Gabriel Polli',  cargo:'Executivo Comercial',     area:'Seguradoras',gestorId:id(4), cor:PALETA[3]},
+    {id:id(6), nome:'Luiza Campos',   cargo:'Executiva Comercial',     area:'Frotistas',  gestorId:id(4), cor:PALETA[3]},
+    {id:id(7), nome:'Marcos Vieira',  cargo:'Analista Comercial',      area:'Inteligência',gestorId:id(5),cor:PALETA[4]}
+  ];
+  return {
+    nome:'Estrutura comercial (exemplo)',
+    autoLayout:true,
+    pessoas: base.map(p => Object.assign({}, p, {visiveis:{cargo:true, area:true, email:false, telefone:false, gestor:false, obs:false}})),
+    config: Object.assign({}, CONFIG_PADRAO)
+  };
+}
+
+/* ---------------------------------------------------------
+   RENDERIZAÇÃO
+   --------------------------------------------------------- */
+function aplicarConfig(){
+  const cfg = config();
+  const t = metricas();
+
+  area.className = 'org-area tema-' + cfg.tema + (cfg.canvasFundo !== 'auto' ? ' fundo-' + cfg.canvasFundo : '');
+  palco.className = 'org-palco' + (cfg.canvasGrid !== 'nenhum' ? ' grid-' + cfg.canvasGrid : '');
+
+  const v = (nome, valor) => area.style.setProperty(nome, valor);
+  v('--org-card-w', t.w + 'px');
+  v('--org-foto-tam', t.foto + 'px');
+  v('--org-nome-fs', t.nome + 'px');
+  v('--org-cargo-fs', t.cargo + 'px');
+  v('--org-meta-fs', t.meta + 'px');
+  v('--org-pad-t', t.padT + 'px');
+  v('--org-pad-b', t.padB + 'px');
+  v('--org-pad-x', t.padX + 'px');
+  v('--org-card-raio', RAIOS[cfg.cardFormato] || RAIOS.arredondado);
+  v('--org-card-borda-l', cfg.cardBorda ? '1px' : '0px');
+  v('--org-foto-raio', cfg.fotoFormato === 'circular' ? '50%' : '12px');
+  v('--org-linha-esp', cfg.linhaEspessura + 'px');
+  if(!cfg.cardSombra) v('--org-card-sombra','none'); else area.style.removeProperty('--org-card-sombra');
+  if(cfg.linhaCor !== 'auto') v('--org-linha', cfg.linhaCor); else area.style.removeProperty('--org-linha');
+}
+
+function criarCard(p){
+  const cfg = config();
+  const el = document.createElement('div');
+  el.className = 'org-card estilo-' + p.estilo + (selecionado === p.id ? ' selecionado' : '');
+  el.dataset.id = p.id;
+  el.style.setProperty('--cor', p.cor);
+  el.setAttribute('tabindex','0');
+  el.setAttribute('role','button');
+
+  const diretos = filhosDe(p.id).length;
+  const gestor = p.gestorId ? pessoa(p.gestorId) : null;
+  const metas = [];
+  if(p.visiveis.email && p.email)       metas.push(escapar(p.email));
+  if(p.visiveis.telefone && p.telefone) metas.push(escapar(p.telefone));
+  if(p.visiveis.gestor && gestor)       metas.push('Reporta a ' + escapar(gestor.nome));
+  if(p.visiveis.obs && p.obs)           metas.push(escapar(p.obs));
+
+  el.innerHTML = `
+    ${cfg.mostrarFoto ? `<div class="org-foto"${p.foto ? ` style="background-image:url('${p.foto}')"` : ''}>${p.foto ? '' : escapar(iniciais(p.nome))}</div>` : ''}
+    <div class="org-nome">${escapar(p.nome)}</div>
+    ${p.visiveis.cargo && p.cargo ? `<div class="org-cargo">${escapar(p.cargo)}</div>` : ''}
+    ${p.visiveis.area && p.area ? `<span class="org-etiqueta">${escapar(p.area)}</span>` : ''}
+    ${metas.length ? `<div class="org-metas">${metas.map(m => `<div class="org-meta-linha">${m}</div>`).join('')}</div>` : ''}
+    ${cfg.mostrarDiretos && diretos ? `<div class="org-diretos">${diretos} ${diretos === 1 ? 'direto' : 'diretos'}</div>` : ''}
+    <div class="org-alca" data-alca="${p.id}" title="Arraste até outra pessoa para criar o vínculo"></div>`;
+
+  posicionar(el, p);
+  elementos[p.id] = el;
+  return el;
+}
+
+function posicionar(el, p){
+  el.style.transform = `translate3d(${p.x}px,${p.y}px,0)`;
+}
+
+function render(){
+  const m = mapaAtual();
+  aplicarConfig();
+  caixaCards.innerHTML = '';
+  svg.innerHTML = '';
+  elementos = {}; arestas = {};
+
+  if(m){
+    const fragmento = document.createDocumentFragment();
+    m.pessoas.forEach(p => fragmento.appendChild(criarCard(p)));
+    caixaCards.appendChild(fragmento);
+  }
+  pendenteRender = false;
+  medido = false;
+  if(paginaVisivel()) finalizarRender();
+  atualizarCabecalho();
+}
+
+/** Medição e desenho das linhas só funcionam com a aba visível. */
+function finalizarRender(){
+  medir();
+  desenharLinhas();
+  medido = true;
+}
+
+function medir(){
+  Object.keys(elementos).forEach(id => { alturas[id] = elementos[id].offsetHeight || alturas[id] || 176; });
+}
+
+function paginaVisivel(){
+  const pg = document.getElementById('pagina-organograma');
+  return !!pg && pg.classList.contains('ativa');
+}
+
+/** As dicas saem de cena assim que o canvas começa a ser usado. */
+function ocultarDicas(){
+  if(localStorage.getItem(CHAVE_DICAS) === 'oculto') return;
+  localStorage.setItem(CHAVE_DICAS, 'oculto');
+  if(dicas) dicas.style.display = 'none';
+}
+
+function atualizarCabecalho(){
+  const m = mapaAtual();
+  const total = m ? m.pessoas.length : 0;
+  contagem.innerHTML = `<b>${total}</b> ${total === 1 ? 'pessoa' : 'pessoas'}`;
+  vazio.style.display = total ? 'none' : 'grid';
+
+  seletor.innerHTML = estado.organogramas
+    .map(o => `<option value="${o.id}"${o.id === estado.atualId ? ' selected' : ''}>${escapar(o.nome)}</option>`).join('');
+
+  const mostrarDicas = total > 0 && localStorage.getItem(CHAVE_DICAS) !== 'oculto';
+  dicas.style.display = mostrarDicas ? 'block' : 'none';
+}
+
+/* ---------- Conexões ---------- */
+function chaveAresta(paiId, filhoId){ return paiId + '>' + filhoId; }
+
+function pontos(pai, filho){
+  const t = metricas();
+  return {
+    a:{x: pai.x + t.w/2,   y: pai.y + alturaDe(pai.id)},
+    b:{x: filho.x + t.w/2, y: filho.y}
+  };
+}
+
+function caminho(pai, filho){
+  const {a,b} = pontos(pai, filho);
+  const estilo = config().linhaEstilo;
+
+  if(estilo === 'reta') return `M${a.x} ${a.y} L${b.x} ${b.y}`;
+
+  const my = (a.y + b.y) / 2;
+  if(estilo === 'curva') return `M${a.x} ${a.y} C${a.x} ${my} ${b.x} ${my} ${b.x} ${b.y}`;
+
+  // Ortogonal com cantos arredondados
+  if(Math.abs(b.x - a.x) < 1.5) return `M${a.x} ${a.y} L${b.x} ${b.y}`;
+  const r = Math.max(0, Math.min(14, Math.abs(b.x - a.x)/2, Math.abs(my - a.y), Math.abs(b.y - my)));
+  const sx = b.x > a.x ? 1 : -1;
+  const sy = b.y > a.y ? 1 : -1;
+  return `M${a.x} ${a.y} L${a.x} ${my - r*sy} Q${a.x} ${my} ${a.x + r*sx} ${my} `
+       + `L${b.x - r*sx} ${my} Q${b.x} ${my} ${b.x} ${my + r*sy} L${b.x} ${b.y}`;
+}
+
+function desenharLinhas(){
+  svg.innerHTML = '';
+  arestas = {};
+  const cfg = config();
+  const frag = document.createDocumentFragment();
+  pessoas().forEach(p => {
+    if(!p.gestorId) return;
+    const pai = pessoa(p.gestorId);
+    if(!pai) return;
+    const path = document.createElementNS('http://www.w3.org/2000/svg','path');
+    path.setAttribute('class','org-conexao');
+    path.setAttribute('d', caminho(pai, p));
+    if(cfg.linhaTracejada) path.setAttribute('stroke-dasharray','7 6');
+    frag.appendChild(path);
+    arestas[chaveAresta(pai.id, p.id)] = path;
+  });
+  svg.appendChild(frag);
+}
+
+/** Atualiza apenas as arestas ligadas às pessoas informadas. */
+function atualizarLinhas(ids){
+  const conjunto = new Set(ids);
+  Object.keys(arestas).forEach(chave => {
+    const [paiId, filhoId] = chave.split('>');
+    if(!conjunto.has(paiId) && !conjunto.has(filhoId)) return;
+    const pai = pessoa(paiId), filho = pessoa(filhoId);
+    if(pai && filho) arestas[chave].setAttribute('d', caminho(pai, filho));
+  });
+}
+
+/* ---------- Vista (zoom e deslocamento) ---------- */
+function aplicarVista(){
+  mundo.style.transform = `translate3d(${vista.x}px,${vista.y}px,0) scale(${vista.escala})`;
+  const passo = 22 * vista.escala;
+  palco.style.backgroundSize = `${passo}px ${passo}px`;
+  palco.style.backgroundPosition = `${vista.x}px ${vista.y}px`;
+  selo.textContent = Math.round(vista.escala * 100) + '%';
+  const m = mapaAtual();
+  if(m){ m.vista = {x:vista.x, y:vista.y, escala:vista.escala}; agendarSalvar(); }
+}
+
+function aplicarZoom(novaEscala, centro){
+  const alvo = limitar(novaEscala, ZOOM_MIN, ZOOM_MAX);
+  const r = palco.getBoundingClientRect();
+  const px = centro ? centro.x - r.left : r.width / 2;
+  const py = centro ? centro.y - r.top  : r.height / 2;
+  vista.x = px - (px - vista.x) * (alvo / vista.escala);
+  vista.y = py - (py - vista.y) * (alvo / vista.escala);
+  vista.escala = alvo;
+  aplicarVista();
+}
+
+function limites(){
+  const t = metricas();
+  const lista = pessoas();
+  if(!lista.length) return {x1:0, y1:0, x2:t.w, y2:200};
+  let x1 = Infinity, y1 = Infinity, x2 = -Infinity, y2 = -Infinity;
+  lista.forEach(p => {
+    x1 = Math.min(x1, p.x); y1 = Math.min(y1, p.y);
+    x2 = Math.max(x2, p.x + t.w); y2 = Math.max(y2, p.y + alturaDe(p.id));
+  });
+  return {x1,y1,x2,y2};
+}
+
+function centralizar(){
+  if(!medido) finalizarRender();
+  const b = limites();
+  const r = palco.getBoundingClientRect();
+  if(!r.width) return;
+  const margem = 48;
+  const LEITURA = 0.6;   // abaixo disso os cartões ficam ilegíveis
+  const largura = Math.max(1, b.x2 - b.x1);
+  const altura  = Math.max(1, b.y2 - b.y1);
+  const couber = Math.min((r.width - margem*2) / largura, (r.height - margem*2) / altura);
+  const escala = limitar(Math.max(couber, Math.min(LEITURA, 1)), ZOOM_MIN, 1.1);
+
+  vista.escala = escala;
+  vista.x = (r.width - largura * escala) / 2 - b.x1 * escala;
+  // Estrutura mais alta que a tela: ancora no topo, como em qualquer organograma
+  vista.y = altura * escala + margem*2 > r.height
+    ? margem - b.y1 * escala
+    : (r.height - altura * escala) / 2 - b.y1 * escala;
+  aplicarVista();
+}
+
+/* ---------- Organização automática ---------- */
+function organizar(){
+  const m = mapaAtual();
+  if(!m || !m.pessoas.length) return;
+  if(!medido) finalizarRender();
+
+  const t = metricas();
+  const nivel = {}, posX = {};
+  const visitados = new Set();
+  let cursor = 80;
+
+  const ordenar = lista => lista.slice().sort((a,b) => a.x - b.x || a.nome.localeCompare(b.nome));
+
+  function passo(p, nv){
+    if(visitados.has(p.id)) return null;
+    visitados.add(p.id);
+    nivel[p.id] = nv;
+    const filhos = ordenar(filhosDe(p.id));
+    const xs = filhos.map(f => passo(f, nv + 1)).filter(v => v !== null);
+    if(xs.length){
+      posX[p.id] = (Math.min.apply(null, xs) + Math.max.apply(null, xs)) / 2;
+    }else{
+      posX[p.id] = cursor;
+      cursor += t.w + t.gapX;
+    }
+    return posX[p.id];
+  }
+
+  const raizes = ordenar(m.pessoas.filter(p => !p.gestorId || !pessoa(p.gestorId)));
+  raizes.forEach((raiz, i) => { if(i) cursor += t.gapX; passo(raiz, 0); });
+  m.pessoas.forEach(p => {   // eventuais laços de hierarquia
+    if(visitados.has(p.id)) return;
+    visitados.add(p.id); nivel[p.id] = 0; posX[p.id] = cursor; cursor += t.w + t.gapX;
+  });
+
+  const alturaNivel = {};
+  m.pessoas.forEach(p => {
+    const nv = nivel[p.id] || 0;
+    alturaNivel[nv] = Math.max(alturaNivel[nv] || 0, alturaDe(p.id));
+  });
+  const yNivel = {};
+  let y = 80;
+  Object.keys(alturaNivel).map(Number).sort((a,b) => a-b).forEach(nv => {
+    yNivel[nv] = y; y += alturaNivel[nv] + t.gapY;
+  });
+
+  m.pessoas.forEach(p => {
+    p.x = limitar(Math.round(posX[p.id]), 0, LIMITE_MUNDO.x);
+    p.y = limitar(Math.round(yNivel[nivel[p.id] || 0]), 0, LIMITE_MUNDO.y);
+    const el = elementos[p.id];
+    if(el){
+      el.style.transition = 'transform .32s cubic-bezier(.4,0,.2,1)';
+      posicionar(el, p);
+      setTimeout(() => { el.style.transition = ''; }, 360);
+    }
+  });
+  desenharLinhas();
+  agendarSalvar();
+  centralizar();
+}
+
+/* ---------------------------------------------------------
+   INTERAÇÃO: arrastar, conectar, pan e zoom
+   --------------------------------------------------------- */
+function coordsMundo(clientX, clientY){
+  const r = palco.getBoundingClientRect();
+  return {
+    x:(clientX - r.left - vista.x) / vista.escala,
+    y:(clientY - r.top  - vista.y) / vista.escala
+  };
+}
+
+function aoPressionar(ev){
+  if(ev.button === 2) return;                     // botão direito abre o menu de contexto
+  ponteiros.set(ev.pointerId, {x:ev.clientX, y:ev.clientY});
+
+  if(ponteiros.size === 2){ iniciarPinca(); return; }
+  if(ponteiros.size > 2) return;
+
+  // Overlays (dicas, controles, selo, estado vazio) não movem o canvas
+  if(ev.target.closest('.org-dicas, .org-controles, .org-selo, .org-vazio-canvas')){
+    ponteiros.delete(ev.pointerId);
+    return;
+  }
+
+  const alca = ev.target.closest('.org-alca');
+  const card = ev.target.closest('.org-card');
+
+  if(alca){
+    modo = 'conexao';
+    const p = pessoa(alca.dataset.alca);
+    if(!p){ modo = null; return; }
+    const t = metricas();
+    conexao = {
+      origem:p.id,
+      inicio:{x:p.x + t.w/2, y:p.y + alturaDe(p.id)},
+      path:document.createElementNS('http://www.w3.org/2000/svg','path')
+    };
+    conexao.path.setAttribute('class','org-fantasma');
+    svg.appendChild(conexao.path);
+  }else if(card){
+    modo = 'card';
+    const p = pessoa(card.dataset.id);
+    if(!p){ modo = null; return; }
+    const ids = ev.shiftKey ? subarvore(p.id) : [p.id];
+    arraste = {
+      ids,
+      origem:coordsMundo(ev.clientX, ev.clientY),
+      base:ids.reduce((acc,id) => { const q = pessoa(id); if(q) acc[id] = {x:q.x, y:q.y}; return acc; }, {}),
+      moveu:false
+    };
+    ids.forEach(id => elementos[id] && elementos[id].classList.add('arrastando'));
+  }else{
+    modo = 'pan';
+    arraste = {origem:{x:ev.clientX, y:ev.clientY}, base:{x:vista.x, y:vista.y}, moveu:false};
+    palco.classList.add('arrastando-canvas');
+  }
+
+  try{ palco.setPointerCapture(ev.pointerId); }catch(e){}
+  fecharMenuContexto();
+}
+
+function aoMover(ev){
+  if(!ponteiros.has(ev.pointerId)) return;
+  ponteiros.set(ev.pointerId, {x:ev.clientX, y:ev.clientY});
+
+  if(modo === 'pinca'){ processarPinca(); return; }
+  if(!modo) return;
+
+  quadroPendente = quadroPendente || requestAnimationFrame(() => {
+    quadroPendente = null;
+    const ponteiro = ponteiros.get(ev.pointerId);
+    if(!ponteiro) return;
+
+    if(modo === 'pan'){
+      vista.x = arraste.base.x + (ponteiro.x - arraste.origem.x);
+      vista.y = arraste.base.y + (ponteiro.y - arraste.origem.y);
+      arraste.moveu = true;
+      aplicarVista();
+      return;
+    }
+
+    if(modo === 'card'){
+      const atual = coordsMundo(ponteiro.x, ponteiro.y);
+      const dx = atual.x - arraste.origem.x;
+      const dy = atual.y - arraste.origem.y;
+      if(Math.abs(dx) > 3 || Math.abs(dy) > 3) arraste.moveu = true;
+      arraste.ids.forEach(id => {
+        const p = pessoa(id), b = arraste.base[id];
+        if(!p || !b) return;
+        p.x = limitar(Math.round(b.x + dx), 0, LIMITE_MUNDO.x);
+        p.y = limitar(Math.round(b.y + dy), 0, LIMITE_MUNDO.y);
+        posicionar(elementos[id], p);
+      });
+      atualizarLinhas(arraste.ids);
+      return;
+    }
+
+    if(modo === 'conexao'){
+      const atual = coordsMundo(ponteiro.x, ponteiro.y);
+      conexao.path.setAttribute('d', `M${conexao.inicio.x} ${conexao.inicio.y} C${conexao.inicio.x} ${(conexao.inicio.y+atual.y)/2} ${atual.x} ${(conexao.inicio.y+atual.y)/2} ${atual.x} ${atual.y}`);
+      const alvo = document.elementFromPoint(ponteiro.x, ponteiro.y);
+      const card = alvo && alvo.closest ? alvo.closest('.org-card') : null;
+      Object.values(elementos).forEach(el => el.classList.remove('alvo-conexao'));
+      if(card && card.dataset.id !== conexao.origem) card.classList.add('alvo-conexao');
+    }
+  });
+}
+
+function aoSoltar(ev){
+  ponteiros.delete(ev.pointerId);
+  try{ palco.releasePointerCapture(ev.pointerId); }catch(e){}
+
+  if(modo === 'pinca'){
+    if(ponteiros.size < 2){ modo = null; pinca = null; }
+    return;
+  }
+
+  if(modo === 'card'){
+    arraste.ids.forEach(id => elementos[id] && elementos[id].classList.remove('arrastando'));
+    if(arraste.moveu){ agendarSalvar(); ocultarDicas(); }
+    else{ selecionar(arraste.ids[0]); }
+  }
+
+  if(modo === 'conexao'){
+    const alvo = document.elementFromPoint(ev.clientX, ev.clientY);
+    const card = alvo && alvo.closest ? alvo.closest('.org-card') : null;
+    Object.values(elementos).forEach(el => el.classList.remove('alvo-conexao'));
+    if(conexao.path.parentNode) conexao.path.remove();
+    if(card && card.dataset.id !== conexao.origem) vincular(conexao.origem, card.dataset.id);
+    conexao = null;
+  }
+
+  if(modo === 'pan'){
+    palco.classList.remove('arrastando-canvas');
+    if(!arraste.moveu) selecionar(null);
+  }
+
+  modo = null; arraste = null;
+}
+
+function iniciarPinca(){
+  const pts = Array.from(ponteiros.values());
+  if(pts.length < 2) return;
+  if(modo === 'card' && arraste){
+    arraste.ids.forEach(id => elementos[id] && elementos[id].classList.remove('arrastando'));
+  }
+  palco.classList.remove('arrastando-canvas');
+  modo = 'pinca';
+  arraste = null;
+  pinca = {
+    distancia:Math.hypot(pts[0].x - pts[1].x, pts[0].y - pts[1].y) || 1,
+    escala:vista.escala
+  };
+}
+
+function processarPinca(){
+  const pts = Array.from(ponteiros.values());
+  if(pts.length < 2 || !pinca) return;
+  const dist = Math.hypot(pts[0].x - pts[1].x, pts[0].y - pts[1].y) || 1;
+  const centro = {x:(pts[0].x + pts[1].x)/2, y:(pts[0].y + pts[1].y)/2};
+  aplicarZoom(pinca.escala * (dist / pinca.distancia), centro);
+}
+
+function aoRolar(ev){
+  ev.preventDefault();
+  const fator = Math.exp(-ev.deltaY * (ev.deltaMode === 1 ? 0.02 : 0.0016));
+  aplicarZoom(vista.escala * fator, {x:ev.clientX, y:ev.clientY});
+}
+
+function selecionar(id){
+  selecionado = id;
+  Object.keys(elementos).forEach(k => elementos[k].classList.toggle('selecionado', k === id));
+}
+
+/* ---------- Vínculos hierárquicos ---------- */
+function vincular(gestorId, subordinadoId){
+  const sub = pessoa(subordinadoId);
+  if(!sub) return;
+  if(gestorId === subordinadoId) return;
+  if(ehDescendente(subordinadoId, gestorId)){
+    return toast('Esse vínculo criaria um ciclo na hierarquia.','erro');
+  }
+  sub.gestorId = gestorId;
+  render();
+  agendarSalvar();
+  toast(`${sub.nome} agora reporta a ${pessoa(gestorId).nome}.`);
+}
+
+function desvincular(id){
+  const p = pessoa(id);
+  if(!p || !p.gestorId) return toast('Essa pessoa já está no topo da estrutura.','erro');
+  p.gestorId = null;
+  render();
+  agendarSalvar();
+  toast('Vínculo removido.');
+}
+
+/* ---------------------------------------------------------
+   MODAL DE PESSOA
+   --------------------------------------------------------- */
+function abrirModalPessoa(id, predefinidos){
+  const m = mapaAtual();
+  if(!m) return;
+  editandoPessoa = id || null;
+  const p = id ? pessoa(id) : null;
+
+  rascunho = {
+    foto: p ? p.foto : null,
+    cor: p ? p.cor : PALETA[m.pessoas.length % PALETA.length],
+    estilo: p ? p.estilo : 'padrao',
+    visiveis: p ? Object.assign({}, p.visiveis) : {cargo:true, area:true, email:false, telefone:false, gestor:false, obs:false}
+  };
+  if(predefinidos && predefinidos.cor) rascunho.cor = predefinidos.cor;
+
+  $('#orgTituloModal').textContent = p ? 'Editar pessoa' : 'Adicionar pessoa';
+  $('#orgNome').value     = p ? p.nome : '';
+  $('#orgCargo').value    = p ? p.cargo : (predefinidos && predefinidos.cargo || '');
+  $('#orgAreaCampo').value= p ? p.area : (predefinidos && predefinidos.area || '');
+  $('#orgEmail').value    = p ? p.email : '';
+  $('#orgTelefone').value = p ? p.telefone : '';
+  $('#orgObs').value      = p ? p.obs : '';
+  $('#orgBtnExcluirPessoa').style.display = p ? '' : 'none';
+
+  // Gestores possíveis (sem gerar ciclo)
+  const gestorPre = p ? p.gestorId : (predefinidos && predefinidos.gestorId) || '';
+  const opcoes = m.pessoas
+    .filter(o => o.id !== id && !(id && ehDescendente(id, o.id)))
+    .map(o => `<option value="${o.id}"${o.id === gestorPre ? ' selected' : ''}>${escapar(o.nome)}${o.cargo ? ' — ' + escapar(o.cargo) : ''}</option>`)
+    .join('');
+  $('#orgGestor').innerHTML = `<option value="">Sem gestor (topo da estrutura)</option>` + opcoes;
+
+  // Áreas já usadas, para autocompletar
+  const areas = [...new Set(m.pessoas.map(o => o.area).filter(Boolean))];
+  $('#orgListaAreas').innerHTML = areas.map(a => `<option value="${escapar(a)}"></option>`).join('');
+
+  $('#orgCores').innerHTML = PALETA
+    .map(c => `<button type="button" class="org-cor" data-cor="${c}" style="background:${c}" aria-label="Cor ${c}"></button>`).join('');
+
+  atualizarRascunhoNaTela();
+  abrirModal('modalPessoa');
+  setTimeout(() => $('#orgNome').focus(), 120);
+}
+
+function atualizarRascunhoNaTela(){
+  const previa = $('#orgFotoPrevia');
+  previa.classList.toggle('circular', config().fotoFormato === 'circular');
+  if(rascunho.foto){
+    previa.style.backgroundImage = `url('${rascunho.foto}')`;
+    previa.textContent = '';
+  }else{
+    previa.style.backgroundImage = 'none';
+    previa.textContent = iniciais($('#orgNome').value) ;
+    previa.style.color = rascunho.cor;
+  }
+  $$('#orgCores .org-cor').forEach(b => b.classList.toggle('ativa', b.dataset.cor === rascunho.cor));
+  $$('#orgEstilos .org-opcao').forEach(b => b.classList.toggle('ativa', b.dataset.valor === rascunho.estilo));
+  $$('[data-org-visivel]').forEach(c => { c.checked = !!rascunho.visiveis[c.dataset.orgVisivel]; });
+}
+
+function salvarPessoa(){
+  const m = mapaAtual();
+  if(!m) return;
+  const nome = $('#orgNome').value.trim();
+  if(!nome) return toast('Informe o nome da pessoa.','erro');
+
+  const gestorId = $('#orgGestor').value || null;
+  const dados = {
+    nome,
+    cargo:$('#orgCargo').value.trim(),
+    area:$('#orgAreaCampo').value.trim(),
+    email:$('#orgEmail').value.trim(),
+    telefone:$('#orgTelefone').value.trim(),
+    obs:$('#orgObs').value.trim(),
+    gestorId,
+    foto:rascunho.foto,
+    cor:rascunho.cor,
+    estilo:rascunho.estilo,
+    visiveis:Object.assign({}, rascunho.visiveis)
+  };
+
+  if(editandoPessoa){
+    const p = pessoa(editandoPessoa);
+    if(gestorId && ehDescendente(editandoPessoa, gestorId)){
+      return toast('Esse gestor está abaixo da pessoa na estrutura.','erro');
+    }
+    Object.assign(p, dados);
+    toast('Pessoa atualizada.');
+  }else{
+    const nova = normalizarPessoa(Object.assign({}, dados, posicaoNova(gestorId)), m.pessoas.length);
+    m.pessoas.push(nova);
+    selecionado = nova.id;
+    ocultarDicas();
+    toast('Pessoa adicionada ao organograma.');
+  }
+
+  fecharModal('modalPessoa');
+  editandoPessoa = null;
+  render();
+  agendarSalvar();
+}
+
+/** Coloca a nova pessoa logo abaixo do gestor, ou no espaço livre. */
+function posicaoNova(gestorId){
+  const t = metricas();
+  const gestor = gestorId ? pessoa(gestorId) : null;
+  if(gestor){
+    const irmaos = filhosDe(gestor.id);
+    const base = gestor.x - ((irmaos.length) * (t.w + t.gapX)) / 2;
+    return {
+      x: limitar(Math.round(base + irmaos.length * (t.w + t.gapX)), 0, LIMITE_MUNDO.x),
+      y: limitar(Math.round(gestor.y + alturaDe(gestor.id) + t.gapY), 0, LIMITE_MUNDO.y)
+    };
+  }
+  const b = limites();
+  return {x:limitar(Math.round(b.x1), 0, LIMITE_MUNDO.x), y:limitar(Math.round(b.y2 + t.gapY), 0, LIMITE_MUNDO.y)};
+}
+
+function excluirPessoa(id){
+  const p = pessoa(id);
+  if(!p) return;
+  const diretos = filhosDe(id);
+  const texto = diretos.length
+    ? `${p.nome} tem ${diretos.length === 1 ? 'um subordinado direto' : diretos.length + ' subordinados diretos'}. Eles continuarão no organograma, sem gestor.`
+    : `${p.nome} será removido deste organograma.`;
+
+  $('#btnConfirmarExclusao').style.display = '';
+  confirmar('Excluir pessoa', texto, 'Excluir', () => {
+    const m = mapaAtual();
+    m.pessoas = m.pessoas.filter(o => o.id !== id);
+    m.pessoas.forEach(o => { if(o.gestorId === id) o.gestorId = null; });
+    delete alturas[id];
+    if(selecionado === id) selecionado = null;
+    if(editandoPessoa === id){ editandoPessoa = null; fecharModal('modalPessoa'); }
+    render();
+    agendarSalvar();
+    toast('Pessoa excluída.');
+  });
+}
+
+function duplicarPessoa(id){
+  const p = pessoa(id);
+  const m = mapaAtual();
+  if(!p || !m) return;
+  const t = metricas();
+  const copia = normalizarPessoa(Object.assign({}, p, {
+    id:gerarId(),
+    nome:p.nome + ' (cópia)',
+    x:limitar(p.x + t.w + t.gapX, 0, LIMITE_MUNDO.x),
+    y:p.y
+  }), m.pessoas.length);
+  m.pessoas.push(copia);
+  selecionado = copia.id;
+  render();
+  agendarSalvar();
+  toast('Pessoa duplicada.');
+}
+
+/* ---------------------------------------------------------
+   MENU DE CONTEXTO
+   --------------------------------------------------------- */
+function abrirMenuContexto(ev, id){
+  const p = pessoa(id);
+  if(!p) return;
+  contextoId = id;
+  selecionar(id);
+  $('#orgMenuTitulo').innerHTML = `<b>${escapar(p.nome)}</b>${p.cargo ? escapar(p.cargo) : 'Sem cargo definido'}`;
+  menuCtx.classList.add('aberto');
+  const largura = menuCtx.offsetWidth, altura = menuCtx.offsetHeight;
+  menuCtx.style.left = Math.min(ev.clientX, window.innerWidth  - largura - 12) + 'px';
+  menuCtx.style.top  = Math.min(ev.clientY, window.innerHeight - altura  - 12) + 'px';
+}
+function fecharMenuContexto(){
+  menuCtx.classList.remove('aberto');
+}
+
+/* ---------------------------------------------------------
+   ORGANOGRAMAS (múltiplos cenários)
+   --------------------------------------------------------- */
+function abrirModalNome(acao){
+  modoNome = acao;
+  const m = mapaAtual();
+  const titulos = {
+    novo:['Novo organograma','Crie versões para comparar cenários'],
+    renomear:['Renomear organograma','Atualize o nome desta versão'],
+    duplicar:['Duplicar organograma','A estrutura atual será copiada para a nova versão']
+  };
+  $('#orgTituloNome').textContent = titulos[acao][0];
+  $('#orgSubNome').textContent    = titulos[acao][1];
+  $('#orgNomeMapa').value = acao === 'renomear' ? (m ? m.nome : '')
+                          : acao === 'duplicar' ? (m ? m.nome + ' (cópia)' : '')
+                          : '';
+  abrirModal('modalOrgNome');
+  setTimeout(() => $('#orgNomeMapa').focus(), 120);
+}
+
+function salvarNomeMapa(){
+  const nome = $('#orgNomeMapa').value.trim();
+  if(!nome) return toast('Informe um nome para o organograma.','erro');
+  const m = mapaAtual();
+
+  if(modoNome === 'renomear' && m){
+    m.nome = nome;
+    toast('Organograma renomeado.');
+  }else if(modoNome === 'duplicar' && m){
+    const copia = clonarMapa(m, nome);
+    estado.organogramas.push(copia);
+    estado.atualId = copia.id;
+    toast('Organograma duplicado.');
+  }else{
+    const novo = normalizarMapa({nome, config:Object.assign({}, config())});
+    estado.organogramas.push(novo);
+    estado.atualId = novo.id;
+    toast('Organograma criado. Adicione a primeira pessoa.');
+  }
+
+  fecharModal('modalOrgNome');
+  modoNome = null;
+  trocarMapa(estado.atualId);
+  salvar();
+}
+
+function clonarMapa(m, nome){
+  const mapaIds = {};
+  m.pessoas.forEach(p => { mapaIds[p.id] = gerarId(); });
+  return normalizarMapa({
+    id:gerarId(),
+    nome:nome || m.nome + ' (cópia)',
+    config:Object.assign({}, m.config),
+    vista:m.vista,
+    pessoas:m.pessoas.map(p => Object.assign({}, p, {
+      id:mapaIds[p.id],
+      gestorId:p.gestorId ? mapaIds[p.gestorId] || null : null
+    }))
+  });
+}
+
+function excluirMapa(){
+  const m = mapaAtual();
+  if(!m) return;
+  if(estado.organogramas.length === 1){
+    return toast('Mantenha ao menos um organograma. Você pode excluir as pessoas ou renomeá-lo.','erro');
+  }
+  $('#btnConfirmarExclusao').style.display = '';
+  confirmar('Excluir organograma',
+    `"${m.nome}" e as ${m.pessoas.length} pessoas desta versão serão removidos. Esta ação não pode ser desfeita.`,
+    'Excluir',
+    () => {
+      estado.organogramas = estado.organogramas.filter(o => o.id !== m.id);
+      estado.atualId = estado.organogramas[0].id;
+      trocarMapa(estado.atualId);
+      salvar();
+      toast('Organograma excluído.');
+    });
+}
+
+function trocarMapa(id){
+  estado.atualId = id;
+  selecionado = null;
+  alturas = {};
+  const m = mapaAtual();
+  render();
+  if(m && m.vista){ vista = Object.assign({}, m.vista); aplicarVista(); }
+  else centralizar();
+  agendarSalvar();
+}
+
+/* ---------------------------------------------------------
+   FOTOS
+   --------------------------------------------------------- */
+/** Recorta no centro, reduz para 256px e comprime em JPEG. */
+function prepararFoto(arquivo){
+  return new Promise((resolve, reject) => {
+    if(!arquivo || !/^image\//.test(arquivo.type)) return reject(new Error('formato'));
+    const leitor = new FileReader();
+    leitor.onerror = () => reject(new Error('leitura'));
+    leitor.onload = () => {
+      const img = new Image();
+      img.onerror = () => reject(new Error('imagem'));
+      img.onload = () => {
+        const lado = Math.min(img.width, img.height);
+        const destino = Math.min(256, lado);
+        const cv = document.createElement('canvas');
+        cv.width = cv.height = destino;
+        const ctx = cv.getContext('2d');
+        ctx.drawImage(img, (img.width - lado)/2, (img.height - lado)/2, lado, lado, 0, 0, destino, destino);
+        resolve(cv.toDataURL('image/jpeg', 0.82));
+      };
+      img.src = leitor.result;
+    };
+    leitor.readAsDataURL(arquivo);
+  });
+}
+
+/* ---------------------------------------------------------
+   EXPORTAÇÃO — PNG e PDF desenhados diretamente no canvas
+   (sem bibliotecas extras, mantendo fidelidade ao tema)
+   --------------------------------------------------------- */
+function lerCores(){
+  const s = getComputedStyle(area);
+  const ler = n => s.getPropertyValue(n).trim();
+  return {
+    fundo:ler('--org-fundo') || '#fff',
+    cardBg:ler('--org-card-bg') || '#fff',
+    cardBorda:ler('--org-card-borda') || '#E5E9F0',
+    titulo:ler('--org-titulo') || '#1B2033',
+    sub:ler('--org-sub') || '#6B7280',
+    meta:ler('--org-meta') || '#8A94A6',
+    linha:ler('--org-linha') || '#B9C6DA',
+    tagBg:ler('--org-tag-bg') || '#EEF1F6',
+    tagCor:ler('--org-tag-cor') || '#0A64FF',
+    fotoBg:ler('--org-foto-bg') || '#EDF2FB'
+  };
+}
+
+function fonte(peso, tam){ return `${peso} ${tam}px Poppins, system-ui, -apple-system, sans-serif`; }
+
+function retangulo(ctx, x, y, w, h, r){
+  const raio = Math.min(r, w/2, h/2);
+  ctx.beginPath();
+  ctx.moveTo(x + raio, y);
+  ctx.arcTo(x + w, y, x + w, y + h, raio);
+  ctx.arcTo(x + w, y + h, x, y + h, raio);
+  ctx.arcTo(x, y + h, x, y, raio);
+  ctx.arcTo(x, y, x + w, y, raio);
+  ctx.closePath();
+}
+
+function quebrarTexto(ctx, texto, maxLargura, maxLinhas){
+  const palavras = String(texto).split(/\s+/).filter(Boolean);
+  const linhas = [];
+  let atual = '';
+  palavras.forEach(palavra => {
+    const teste = atual ? atual + ' ' + palavra : palavra;
+    if(ctx.measureText(teste).width <= maxLargura || !atual){ atual = teste; }
+    else{ linhas.push(atual); atual = palavra; }
+  });
+  if(atual) linhas.push(atual);
+  if(linhas.length > maxLinhas){
+    const cortadas = linhas.slice(0, maxLinhas);
+    let ultima = cortadas[maxLinhas-1];
+    while(ultima.length > 4 && ctx.measureText(ultima + '…').width > maxLargura) ultima = ultima.slice(0,-1);
+    cortadas[maxLinhas-1] = ultima + '…';
+    return cortadas;
+  }
+  return linhas;
+}
+
+function cortarTexto(ctx, texto, maxLargura){
+  let txt = String(texto);
+  if(ctx.measureText(txt).width <= maxLargura) return txt;
+  while(txt.length > 1 && ctx.measureText(txt + '…').width > maxLargura) txt = txt.slice(0,-1);
+  return txt + '…';
+}
+
+function carregarImagem(src){
+  if(cacheImagens.has(src)) return Promise.resolve(cacheImagens.get(src));
+  return new Promise(resolve => {
+    const img = new Image();
+    img.onload = () => { cacheImagens.set(src, img); resolve(img); };
+    img.onerror = () => resolve(null);
+    img.src = src;
+  });
+}
+
+async function desenharComposicao(fator){
+  const m = mapaAtual();
+  if(!m || !m.pessoas.length) return null;
+  if(!medido) finalizarRender();
+
+  const cfg = m.config, t = metricas(), cores = lerCores();
+  const b = limites(), margem = 70;
+  const largura = (b.x2 - b.x1) + margem*2;
+  const altura  = (b.y2 - b.y1) + margem*2;
+
+  const cv = document.createElement('canvas');
+  cv.width  = Math.round(largura * fator);
+  cv.height = Math.round(altura * fator);
+  const ctx = cv.getContext('2d');
+
+  ctx.fillStyle = cores.fundo;
+  ctx.fillRect(0, 0, cv.width, cv.height);
+  ctx.setTransform(fator, 0, 0, fator, 0, 0);
+  ctx.translate(margem - b.x1, margem - b.y1);
+
+  // Conexões
+  ctx.strokeStyle = cores.linha;
+  ctx.lineWidth = cfg.linhaEspessura;
+  ctx.lineJoin = 'round';
+  ctx.lineCap = 'round';
+  ctx.setLineDash(cfg.linhaTracejada ? [7,6] : []);
+  m.pessoas.forEach(p => {
+    if(!p.gestorId) return;
+    const pai = pessoa(p.gestorId);
+    if(!pai) return;
+    const {a, b:fim} = pontos(pai, p);
+    ctx.beginPath();
+    if(cfg.linhaEstilo === 'reta'){
+      ctx.moveTo(a.x, a.y); ctx.lineTo(fim.x, fim.y);
+    }else if(cfg.linhaEstilo === 'curva'){
+      const my = (a.y + fim.y)/2;
+      ctx.moveTo(a.x, a.y); ctx.bezierCurveTo(a.x, my, fim.x, my, fim.x, fim.y);
+    }else{
+      const my = (a.y + fim.y)/2;
+      ctx.moveTo(a.x, a.y); ctx.lineTo(a.x, my); ctx.lineTo(fim.x, my); ctx.lineTo(fim.x, fim.y);
+    }
+    ctx.stroke();
+  });
+  ctx.setLineDash([]);
+
+  // Cartões
+  for(const p of m.pessoas){
+    const h = alturaDe(p.id);
+    const raio = parseFloat(RAIOS[cfg.cardFormato]) || 16;
+
+    if(cfg.cardSombra){
+      ctx.save();
+      ctx.shadowColor = 'rgba(5,10,52,.13)';
+      ctx.shadowBlur = 14; ctx.shadowOffsetY = 5;
+      ctx.fillStyle = cores.cardBg;
+      retangulo(ctx, p.x, p.y, t.w, h, raio); ctx.fill();
+      ctx.restore();
+    }
+    ctx.fillStyle = p.estilo === 'solido' ? misturar(p.cor, cores.cardBg, 0.09) : cores.cardBg;
+    retangulo(ctx, p.x, p.y, t.w, h, raio); ctx.fill();
+
+    if(cfg.cardBorda || p.estilo === 'contorno'){
+      ctx.strokeStyle = p.estilo === 'contorno' ? p.cor : cores.cardBorda;
+      ctx.lineWidth = p.estilo === 'contorno' ? 2 : 1;
+      retangulo(ctx, p.x, p.y, t.w, h, raio); ctx.stroke();
+    }
+
+    // Faixa colorida no topo
+    ctx.save();
+    retangulo(ctx, p.x, p.y, t.w, h, raio); ctx.clip();
+    ctx.fillStyle = p.cor;
+    ctx.fillRect(p.x, p.y, t.w, 3);
+    ctx.restore();
+
+    let y = p.y + t.padT;
+    const centro = p.x + t.w/2;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'top';
+
+    if(cfg.mostrarFoto){
+      const tamanho = t.foto;
+      const fx = centro - tamanho/2;
+      ctx.save();
+      if(cfg.fotoFormato === 'circular'){
+        ctx.beginPath(); ctx.arc(centro, y + tamanho/2, tamanho/2, 0, Math.PI*2); ctx.clip();
+      }else{
+        retangulo(ctx, fx, y, tamanho, tamanho, 12); ctx.clip();
+      }
+      const img = p.foto ? await carregarImagem(p.foto) : null;
+      if(img){
+        ctx.drawImage(img, fx, y, tamanho, tamanho);
+      }else{
+        ctx.fillStyle = cores.fotoBg;
+        ctx.fillRect(fx, y, tamanho, tamanho);
+        ctx.fillStyle = p.cor;
+        ctx.font = fonte(600, tamanho * 0.34);
+        ctx.textBaseline = 'middle';
+        ctx.fillText(iniciais(p.nome), centro, y + tamanho/2 + 1);
+        ctx.textBaseline = 'top';
+      }
+      ctx.restore();
+      ctx.strokeStyle = misturar(p.cor, cores.cardBg, 0.35);
+      ctx.lineWidth = 2;
+      if(cfg.fotoFormato === 'circular'){
+        ctx.beginPath(); ctx.arc(centro, y + tamanho/2, tamanho/2 + 1.5, 0, Math.PI*2); ctx.stroke();
+      }else{
+        retangulo(ctx, fx - 1.5, y - 1.5, tamanho + 3, tamanho + 3, 13); ctx.stroke();
+      }
+      y += tamanho + 10;
+    }
+
+    const larguraUtil = t.w - t.padX*2;
+
+    ctx.fillStyle = cores.titulo;
+    ctx.font = fonte(600, t.nome);
+    quebrarTexto(ctx, p.nome, larguraUtil, 2).forEach(linha => {
+      ctx.fillText(linha, centro, y);
+      y += t.nome * 1.32;
+    });
+
+    if(p.visiveis.cargo && p.cargo){
+      y += 3;
+      ctx.fillStyle = cores.sub;
+      ctx.font = fonte(400, t.cargo);
+      quebrarTexto(ctx, p.cargo, larguraUtil, 2).forEach(linha => {
+        ctx.fillText(linha, centro, y);
+        y += t.cargo * 1.35;
+      });
+    }
+
+    if(p.visiveis.area && p.area){
+      y += 9;
+      ctx.font = fonte(500, 10.5);
+      const txt = cortarTexto(ctx, p.area, larguraUtil - 20);
+      const w = ctx.measureText(txt).width + 20;
+      ctx.fillStyle = cores.tagBg;
+      retangulo(ctx, centro - w/2, y, w, 19, 10); ctx.fill();
+      ctx.fillStyle = cores.tagCor;
+      ctx.textBaseline = 'middle';
+      ctx.fillText(txt, centro, y + 10);
+      ctx.textBaseline = 'top';
+      y += 19;
+    }
+
+    const gestor = p.gestorId ? pessoa(p.gestorId) : null;
+    const metas = [];
+    if(p.visiveis.email && p.email)       metas.push(p.email);
+    if(p.visiveis.telefone && p.telefone) metas.push(p.telefone);
+    if(p.visiveis.gestor && gestor)       metas.push('Reporta a ' + gestor.nome);
+    if(p.visiveis.obs && p.obs)           metas.push(p.obs);
+    if(metas.length){
+      y += 8;
+      ctx.fillStyle = cores.meta;
+      ctx.font = fonte(400, t.meta);
+      metas.forEach(linha => {
+        ctx.fillText(cortarTexto(ctx, linha, larguraUtil), centro, y);
+        y += t.meta * 1.4 + 2;
+      });
+    }
+
+    const diretos = filhosDe(p.id).length;
+    if(cfg.mostrarDiretos && diretos){
+      y += 9;
+      ctx.fillStyle = cores.meta;
+      ctx.font = fonte(500, 10);
+      ctx.fillText(`• ${diretos} ${diretos === 1 ? 'direto' : 'diretos'}`, centro, y);
+    }
+  }
+
+  ctx.setTransform(1,0,0,1,0,0);
+  return {canvas:cv, largura, altura};
+}
+
+/** Mistura duas cores hex para simular color-mix na exportação. */
+function misturar(cor, fundo, peso){
+  const hex = c => {
+    const t = String(c).trim();
+    if(/^#[0-9a-f]{6}$/i.test(t)) return [parseInt(t.slice(1,3),16), parseInt(t.slice(3,5),16), parseInt(t.slice(5,7),16)];
+    const m = t.match(/rgba?\(([^)]+)\)/);
+    if(m){ const p = m[1].split(',').map(Number); return [p[0]||0, p[1]||0, p[2]||0]; }
+    return [255,255,255];
+  };
+  const a = hex(cor), b = hex(fundo);
+  const r = a.map((v,i) => Math.round(v*peso + b[i]*(1-peso)));
+  return `rgb(${r[0]},${r[1]},${r[2]})`;
+}
+
+async function exportarPng(){
+  const m = mapaAtual();
+  if(!m || !m.pessoas.length) return toast('Adicione pessoas antes de exportar.','erro');
+  try{
+    if(document.fonts && document.fonts.ready) await document.fonts.ready;
+    const saida = await desenharComposicao(Math.min(2, window.devicePixelRatio || 1) * 1.5);
+    saida.canvas.toBlob(blob => {
+      baixarArquivo(blob, `organograma-${slug(m.nome)}.png`);
+      toast('Imagem PNG exportada.');
+    }, 'image/png');
+  }catch(e){
+    toast('Não foi possível gerar a imagem.','erro');
+  }
+}
+
+async function exportarPdf(){
+  const m = mapaAtual();
+  if(!m || !m.pessoas.length) return toast('Adicione pessoas antes de exportar.','erro');
+  if(!window.jspdf || !window.jspdf.jsPDF) return toast('Biblioteca de PDF não carregada.','erro');
+  try{
+    if(document.fonts && document.fonts.ready) await document.fonts.ready;
+    const saida = await desenharComposicao(2);
+    const paisagem = saida.largura >= saida.altura;
+    const pdf = new window.jspdf.jsPDF({orientation:paisagem ? 'landscape' : 'portrait', unit:'pt', format:'a4'});
+    const pw = pdf.internal.pageSize.getWidth();
+    const ph = pdf.internal.pageSize.getHeight();
+    const margem = 34, topo = 62;
+
+    pdf.setFont('helvetica','bold'); pdf.setFontSize(15); pdf.setTextColor(5,10,52);
+    pdf.text(m.nome, margem, 38);
+    pdf.setFont('helvetica','normal'); pdf.setFontSize(9); pdf.setTextColor(120,128,142);
+    pdf.text(`${m.pessoas.length} ${m.pessoas.length === 1 ? 'pessoa' : 'pessoas'} · gerado em ${new Date().toLocaleDateString('pt-BR')}`, margem, 51);
+
+    const escala = Math.min((pw - margem*2)/saida.largura, (ph - topo - margem)/saida.altura);
+    const w = saida.largura * escala, h = saida.altura * escala;
+    // JPEG mantém o arquivo leve; o fundo do organograma é sólido e não perde qualidade
+    pdf.addImage(saida.canvas.toDataURL('image/jpeg', 0.92), 'JPEG', (pw - w)/2, topo, w, h);
+    pdf.save(`organograma-${slug(m.nome)}.pdf`);
+    toast('PDF exportado.');
+  }catch(e){
+    toast('Não foi possível gerar o PDF.','erro');
+  }
+}
+
+function exportarJson(){
+  const m = mapaAtual();
+  if(!m) return;
+  const conteudo = {
+    tipo:'organograma-planejamento-comercial',
+    versao:1,
+    exportadoEm:agora(),
+    organograma:m
+  };
+  baixarArquivo(new Blob([JSON.stringify(conteudo, null, 2)], {type:'application/json'}), `organograma-${slug(m.nome)}.json`);
+  toast('Estrutura exportada em JSON.');
+}
+
+function importarJson(arquivo){
+  if(!arquivo) return;
+  const leitor = new FileReader();
+  leitor.onerror = () => toast('Não foi possível ler o arquivo.','erro');
+  leitor.onload = () => {
+    let bruto;
+    try{ bruto = JSON.parse(leitor.result); }
+    catch(e){ return toast('Arquivo inválido: não é um JSON legível.','erro'); }
+
+    const candidatos = Array.isArray(bruto && bruto.organogramas) ? bruto.organogramas
+                     : bruto && bruto.organograma ? [bruto.organograma]
+                     : Array.isArray(bruto && bruto.pessoas) ? [bruto]
+                     : null;
+    if(!candidatos || !candidatos.length){
+      return toast('Arquivo JSON sem a estrutura de organograma esperada.','erro');
+    }
+
+    const usados = estado.organogramas.map(o => o.nome);
+    const novos = candidatos.map(c => {
+      let nome = String(c.nome || 'Organograma importado').slice(0,60);
+      if(usados.includes(nome)) nome = (nome + ' (importado)').slice(0,60);
+      usados.push(nome);
+      const mapa = clonarMapa(normalizarMapa(c), nome);
+      mapa.vista = null;
+      return mapa;
+    });
+    estado.organogramas = estado.organogramas.concat(novos);
+    estado.atualId = novos[0].id;
+    trocarMapa(estado.atualId);
+    salvar();
+    toast(novos.length === 1
+      ? `"${novos[0].nome}" importado como novo organograma.`
+      : `${novos.length} organogramas importados.`);
+  };
+  leitor.readAsText(arquivo);
+}
+
+/* ---------------------------------------------------------
+   PAINEL DE PERSONALIZAÇÃO
+   --------------------------------------------------------- */
+function alternarPainel(forcar){
+  const abrir = typeof forcar === 'boolean' ? forcar : !painel.classList.contains('aberto');
+  painel.classList.toggle('aberto', abrir);
+  if(abrir) sincronizarPainel();
+}
+
+function sincronizarPainel(){
+  const cfg = config();
+  $$('[data-org-config]', painel).forEach(grupo => {
+    const chave = grupo.dataset.orgConfig;
+    $$('.org-opcao', grupo).forEach(b => b.classList.toggle('ativa', b.dataset.valor === cfg[chave]));
+  });
+  $$('[data-org-check]', painel).forEach(c => { c.checked = !!cfg[c.dataset.orgCheck]; });
+  $('#orgLinhaEsp').value = cfg.linhaEspessura;
+  $('#orgLinhaCor').value = cfg.linhaCor === 'auto'
+    ? (getComputedStyle(area).getPropertyValue('--org-linha').trim() || '#a9bbd6')
+    : cfg.linhaCor;
+  $('#orgLinhaCorAuto').classList.toggle('ativa', cfg.linhaCor === 'auto');
+}
+
+function alterarConfig(chave, valor){
+  const m = mapaAtual();
+  if(!m) return;
+  m.config[chave] = valor;
+  const mudouTamanho = chave === 'cardTamanho';
+  render();
+  if(mudouTamanho){ finalizarRender(); }
+  sincronizarPainel();
+  agendarSalvar();
+}
+
+/* ---------------------------------------------------------
+   EVENTOS
+   --------------------------------------------------------- */
+function registrarEventos(){
+  area       = $('#orgArea');
+  palco      = $('#orgPalco');
+  mundo      = $('#orgMundo');
+  svg        = $('#orgLinhas');
+  caixaCards = $('#orgCards');
+  vazio      = $('#orgVazio');
+  dicas      = $('#orgDicas');
+  selo       = $('#orgSelo');
+  seletor    = $('#orgSeletor');
+  contagem   = $('#orgContagem');
+  painel     = $('#orgPainel');
+  menuCtx    = $('#orgMenuContexto');
+
+  // --- Canvas: ponteiro, zoom e duplo clique
+  palco.addEventListener('pointerdown', aoPressionar);
+  palco.addEventListener('pointermove', aoMover);
+  palco.addEventListener('pointerup', aoSoltar);
+  palco.addEventListener('pointercancel', aoSoltar);
+  palco.addEventListener('wheel', aoRolar, {passive:false});
+  palco.addEventListener('dblclick', e => {
+    const card = e.target.closest('.org-card');
+    if(card) abrirModalPessoa(card.dataset.id);
+  });
+  palco.addEventListener('contextmenu', e => {
+    const card = e.target.closest('.org-card');
+    if(!card) return;
+    e.preventDefault();
+    abrirMenuContexto(e, card.dataset.id);
+  });
+
+  // --- Controles do canvas
+  $('#orgZoomMais').addEventListener('click', () => aplicarZoom(vista.escala * 1.2));
+  $('#orgZoomMenos').addEventListener('click', () => aplicarZoom(vista.escala / 1.2));
+  $('#orgZoomReset').addEventListener('click', () => aplicarZoom(1));
+  $('#orgCentralizar').addEventListener('click', centralizar);
+  $('#orgTelaCheia').addEventListener('click', () => {
+    if(document.fullscreenElement) document.exitFullscreen();
+    else if(area.requestFullscreen) area.requestFullscreen();
+  });
+  document.addEventListener('fullscreenchange', () => setTimeout(centralizar, 120));
+
+  let temporizadorTela = null;
+  window.addEventListener('resize', () => {
+    clearTimeout(temporizadorTela);
+    temporizadorTela = setTimeout(garantirVisivel, 260);
+  });
+
+  // --- Barra de ferramentas
+  $('#orgBtnNovaPessoa').addEventListener('click', () => abrirModalPessoa(null));
+  $('#orgBtnPrimeira').addEventListener('click', () => abrirModalPessoa(null));
+  $('#orgBtnOrganizar').addEventListener('click', organizar);
+  $('#orgBtnPersonalizar').addEventListener('click', () => alternarPainel());
+  $('#orgFecharPainel').addEventListener('click', () => alternarPainel(false));
+  seletor.addEventListener('change', () => trocarMapa(seletor.value));
+
+  const menuMais = $('#orgMenuMais');
+  $('#orgBtnMais').addEventListener('click', e => {
+    e.stopPropagation();
+    const aberto = menuMais.classList.toggle('aberto');
+    $('#orgBtnMais').setAttribute('aria-expanded', aberto);
+  });
+  menuMais.addEventListener('click', e => {
+    const botao = e.target.closest('[data-org-acao]');
+    if(!botao) return;
+    menuMais.classList.remove('aberto');
+    const acao = botao.dataset.orgAcao;
+    if(acao === 'png') exportarPng();
+    if(acao === 'pdf') exportarPdf();
+    if(acao === 'json') exportarJson();
+    if(acao === 'importar') $('#orgArquivoJson').click();
+    if(acao === 'novo') abrirModalNome('novo');
+    if(acao === 'duplicar') abrirModalNome('duplicar');
+    if(acao === 'renomear') abrirModalNome('renomear');
+    if(acao === 'excluir') excluirMapa();
+  });
+  document.addEventListener('click', e => {
+    if(!e.target.closest('.org-drop')) menuMais.classList.remove('aberto');
+    if(!e.target.closest('.org-menu-contexto')) fecharMenuContexto();
+  });
+  $('#orgArquivoJson').addEventListener('change', e => {
+    importarJson(e.target.files[0]);
+    e.target.value = '';
+  });
+
+  // --- Dicas de primeiro uso
+  $('#orgBtnFecharDicas').addEventListener('click', () => {
+    localStorage.setItem(CHAVE_DICAS, 'oculto');
+    dicas.style.display = 'none';
+  });
+
+  // --- Menu de contexto
+  menuCtx.addEventListener('click', e => {
+    const botao = e.target.closest('[data-org-menu]');
+    if(!botao || !contextoId) return;
+    const acao = botao.dataset.orgMenu;
+    const alvo = contextoId;
+    fecharMenuContexto();
+    const p = pessoa(alvo);
+    if(!p) return;
+    if(acao === 'editar') abrirModalPessoa(alvo);
+    if(acao === 'subordinado') abrirModalPessoa(null, {gestorId:alvo, area:p.area});
+    if(acao === 'gestor') criarGestorAcima(alvo);
+    if(acao === 'desvincular') desvincular(alvo);
+    if(acao === 'duplicar') duplicarPessoa(alvo);
+    if(acao === 'cor') proximaCor(alvo);
+    if(acao === 'excluir') excluirPessoa(alvo);
+  });
+
+  // --- Modal da pessoa
+  $('#orgBtnSalvarPessoa').addEventListener('click', salvarPessoa);
+  $('#orgBtnExcluirPessoa').addEventListener('click', () => {
+    const id = editandoPessoa;
+    if(!id) return;
+    fecharModal('modalPessoa');
+    editandoPessoa = null;
+    excluirPessoa(id);
+  });
+  $('#orgNome').addEventListener('input', () => { if(!rascunho.foto) atualizarRascunhoNaTela(); });
+  $('#orgCores').addEventListener('click', e => {
+    const b = e.target.closest('[data-cor]');
+    if(!b) return;
+    rascunho.cor = b.dataset.cor;
+    atualizarRascunhoNaTela();
+  });
+  $('#orgEstilos').addEventListener('click', e => {
+    const b = e.target.closest('[data-valor]');
+    if(!b) return;
+    rascunho.estilo = b.dataset.valor;
+    atualizarRascunhoNaTela();
+  });
+  $$('[data-org-visivel]').forEach(c => c.addEventListener('change', () => {
+    rascunho.visiveis[c.dataset.orgVisivel] = c.checked;
+  }));
+  $('#orgBtnFoto').addEventListener('click', () => $('#orgArquivoFoto').click());
+  $('#orgBtnRemoverFoto').addEventListener('click', () => {
+    rascunho.foto = null;
+    atualizarRascunhoNaTela();
+  });
+  $('#orgArquivoFoto').addEventListener('change', e => {
+    const arquivo = e.target.files[0];
+    e.target.value = '';
+    if(!arquivo) return;
+    prepararFoto(arquivo)
+      .then(dataUrl => { rascunho.foto = dataUrl; atualizarRascunhoNaTela(); })
+      .catch(() => toast('Não foi possível usar essa imagem. Tente um JPG ou PNG.','erro'));
+  });
+
+  // --- Modal de nome do organograma
+  $('#orgBtnSalvarNome').addEventListener('click', salvarNomeMapa);
+  $('#orgNomeMapa').addEventListener('keydown', e => { if(e.key === 'Enter') salvarNomeMapa(); });
+
+  // --- Painel de personalização
+  painel.addEventListener('click', e => {
+    const opcao = e.target.closest('[data-org-config] .org-opcao');
+    if(opcao){
+      alterarConfig(opcao.closest('[data-org-config]').dataset.orgConfig, opcao.dataset.valor);
+    }
+  });
+  painel.addEventListener('change', e => {
+    const check = e.target.closest('[data-org-check]');
+    if(check) alterarConfig(check.dataset.orgCheck, check.checked);
+  });
+  $('#orgLinhaEsp').addEventListener('input', e => {
+    const m = mapaAtual(); if(!m) return;
+    m.config.linhaEspessura = parseFloat(e.target.value);
+    aplicarConfig();
+    agendarSalvar();
+  });
+  $('#orgLinhaCor').addEventListener('input', e => alterarConfig('linhaCor', e.target.value));
+  $('#orgLinhaCorAuto').addEventListener('click', () => alterarConfig('linhaCor','auto'));
+  $('#orgRestaurarPadrao').addEventListener('click', () => {
+    const m = mapaAtual(); if(!m) return;
+    m.config = Object.assign({}, CONFIG_PADRAO);
+    render(); finalizarRender(); sincronizarPainel(); agendarSalvar();
+    toast('Aparência restaurada para o padrão Autoglass.');
+  });
+
+  // --- Teclado (só atua com a aba visível e fora de campos de texto)
+  document.addEventListener('keydown', e => {
+    if(!paginaVisivel() || $$('.modal.aberto').length) return;
+    const alvo = e.target;
+    if(alvo && /^(INPUT|TEXTAREA|SELECT)$/.test(alvo.tagName)) return;
+    if((e.key === 'Delete' || e.key === 'Backspace') && selecionado){
+      e.preventDefault();
+      excluirPessoa(selecionado);
+    }
+    if(e.key === 'Escape'){ fecharMenuContexto(); selecionar(null); }
+  });
+}
+
+function criarGestorAcima(id){
+  const p = pessoa(id);
+  const m = mapaAtual();
+  if(!p || !m) return;
+  const t = metricas();
+  const novo = normalizarPessoa({
+    nome:'Novo gestor',
+    cargo:'',
+    area:p.area,
+    gestorId:p.gestorId,
+    cor:p.cor,
+    x:p.x,
+    y:Math.max(0, p.y - alturaDe(p.id) - t.gapY)
+  }, m.pessoas.length);
+  m.pessoas.push(novo);
+  p.gestorId = novo.id;
+  render();
+  agendarSalvar();
+  abrirModalPessoa(novo.id);
+}
+
+function proximaCor(id){
+  const p = pessoa(id);
+  if(!p) return;
+  const i = PALETA.indexOf(p.cor);
+  p.cor = PALETA[(i + 1) % PALETA.length];
+  render();
+  agendarSalvar();
+}
+
+/* ---------------------------------------------------------
+   CICLO DE VIDA
+   --------------------------------------------------------- */
+function iniciar(){
+  carregar();
+  iniciado = true;
+  pendenteRender = true;
+  atualizarCabecalho();
+}
+
+/** Depois de mudar o tamanho da tela, garante que a estrutura siga visível. */
+function garantirVisivel(){
+  if(!paginaVisivel() || !pessoas().length) return;
+  const r = palco.getBoundingClientRect();
+  const t = metricas();
+  const algumVisivel = pessoas().some(p => {
+    const x = p.x * vista.escala + vista.x;
+    const y = p.y * vista.escala + vista.y;
+    return x < r.width && y < r.height && x + t.w * vista.escala > 0 && y + alturaDe(p.id) * vista.escala > 0;
+  });
+  if(!algumVisivel) centralizar();
+}
+
+/** Chamado ao entrar na aba: só então o palco tem dimensões. */
+function aoAbrir(){
+  if(!iniciado) iniciar();
+  if(pendenteRender){
+    render();
+    finalizarRender();
+    const m = mapaAtual();
+    if(m && m.autoLayout && m.pessoas.length){
+      m.autoLayout = false;
+      organizar();
+      salvar();
+    }else if(m && m.vista){
+      vista = Object.assign({}, m.vista); aplicarVista();
+    }else{
+      centralizar();
+    }
+  }else if(!medido){
+    finalizarRender();
+  }
+  // Recalcula uma única vez quando a fonte terminar de carregar (muda a altura dos cartões)
+  if(!fontesConferidas && document.fonts && document.fonts.ready){
+    fontesConferidas = true;
+    document.fonts.ready.then(() => { if(paginaVisivel()){ finalizarRender(); } });
+  }
+}
+
+return {iniciar, registrarEventos, aoAbrir};
+})();
+
 /* =========================================================
    11. EVENTOS
    ========================================================= */
@@ -3562,6 +6153,7 @@ function registrarEventos(){
   // Navegação
   $$('.nav-item').forEach(b => b.addEventListener('click', () => irPara(b.dataset.pagina)));
   $('#btnMenu').addEventListener('click', alternarSidebar);
+  $('#btnFixarSidebar').addEventListener('click', alternarFixarSidebar);
   $('#btnHub').addEventListener('click', () => irPara('hub'));
   $$('.hub-card').forEach(c => c.addEventListener('click', () => {
     const destino = c.dataset.hub;
@@ -3689,6 +6281,9 @@ function registrarEventos(){
   $('#btnBoletimPdf').addEventListener('click', exportarBoletimPdf);
   $('#btnExcel').addEventListener('click', exportarExcel);
   $('#btnPdf').addEventListener('click', exportarPdf);
+
+  // Organograma (módulo próprio)
+  Organograma.registrarEventos();
 }
 
 /* =========================================================
@@ -3703,6 +6298,7 @@ function renderizarHub(){
   rotulo('#hubQtdDashboard', m.total ? `Taxa de conclusão de ${m.taxaConclusao}%` : 'Abrir');
   rotulo('#hubQtdPlano',     acoes.length ? plural(acoes.length,'ação','ações') : 'Cadastrar ações');
   rotulo('#hubQtdSwot',      swots.length ? plural(swots.length,'análise','análises') : 'Criar análise');
+  rotulo('#hubQtdOrganograma', 'Montar estrutura');
   rotulo('#hubQtdConfig',    companhias.length
     ? `${plural(companhias.length,'companhia','companhias')} · ${plural(comerciais.length,'comercial','comerciais')}`
     : 'Configurar cadastros');
@@ -3733,6 +6329,7 @@ function iniciar(){
   limparFormularioSwot();
   renderizarSwots();
   renderizarDashboard();
+  Organograma.iniciar();
   irPara('hub');
 }
 
